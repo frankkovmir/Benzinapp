@@ -1,6 +1,4 @@
 import yaml
-import urllib.request
-import json
 import requests
 
 with open('config.yaml') as file:
@@ -34,14 +32,11 @@ func = "prices.php?"
 url = home + func + "ids=" + ids + "&apikey="+ apikey
 details = requests.get(url).json()
 
-# for ts in data['stations']:
-#     print(f"{ts['place']}, {ts['street']} {ts['houseNumber']}: {ts['name']}")
-#     if ts['id'] in details['prices']:
-#         if details['prices'][ts['id']]['status'] == "open":
-#             print("  Tankstelle geöffnet")
-#         else:
-#             print("  Tankstelle geschlossen")
-#         print("  Diesel-Preis: ", details['prices'][ts['id']]['diesel'])
-
-print(data, '\n\n')
-print(details)
+for ts in data['stations']:
+    print(f"{ts['place']}, {ts['street']} {ts['houseNumber']}: {ts['name']}")
+    if ts['id'] in details['prices']:
+        if details['prices'][ts['id']]['status'] == "open":
+            print("  Tankstelle geöffnet")
+        else:
+            print("  Tankstelle geschlossen")
+        print("  Diesel-Preis: ", details['prices'][ts['id']]['diesel'])
