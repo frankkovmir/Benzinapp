@@ -1,0 +1,8 @@
+api_key: 0572f6bd-e3c1-17eb-fb56-99aa1e4567d2
+fuel_types:
+  - e5
+  - e10
+  - diesel
+latitude: 51.37
+longitude: 7.69
+radius: 10
