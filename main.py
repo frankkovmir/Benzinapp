@@ -4,7 +4,7 @@
 
 import tkinter as tki
 from PIL import ImageTk, Image
-import numpy
+import numpy as np
 import matplotlib
 
 """
