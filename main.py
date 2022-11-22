@@ -9,9 +9,9 @@ import tkinter as tki
 from PIL import ImageTk, Image
 from tkinter import messagebox
 import numpy as np
-import matplotlib
+import matplotlib.pyplot as plt
 import pygame
-import time  # ggf. notwendig für api unterbrechung bei spam
+import time  # ggf. notwendig für api unterbrechung bei spam-requests
 import geocoder
 import geopy
 import pgeocode
@@ -51,7 +51,10 @@ def los_button():
         # Ohne Verbindung zur Google API kann nominatim genutzt werden, die Funktion nimmt aber nur eine PLZ entgegen.
         # Daher erfolgt hier eine rudimentäre Validierung der Adresseingabe
 
-        if len(adresse.get()) == 5 and all(num in string.digits for num in adresse.get()):
+        if len(adresse.get()) == 5 and all(num in string.digits for num in adresse.get()): # checkt die Länge und ob
+            # es sich um einen Zahlenstring handlet (string.digits = 0123456789)
+            # Code von https://www.reddit.com/r/learnpython/comments/ljqyqr
+            # /best_way_to_get_latitude_and_longitude_data_from/
             nomi = pgeocode.Nominatim('de')
             query = nomi.query_postal_code(adresse.get())
             data = {
@@ -60,7 +63,7 @@ def los_button():
             }
             if data:  # extra Sicherheitsabfrage um die Übergabe eines leeren dicts und damit einen fehlerhaften Api-
                 # Aufruf zu vermeiden
-                return popup(data)  # Aufruf der nächsten Funktion und Übergabe der Koordinaten als Parameter
+                return popup(data)  # Aufruf der nächsten Funktion und Übergabe der Koordinaten aus data als Parameter
         else:
             error_sound()
             tki.messagebox.showerror("Falscher Input", f"Die eingegebene Adresse '{adresse.get()}' ist keine "
@@ -70,7 +73,7 @@ def los_button():
         return tki.messagebox.showinfo("Fehlender Input", "Bitte eine Postleitzahl angeben!")
 
 
-# 3.2 Funktion für die Kontrollfrage und Einstieg in die Output - Funktionen
+# 3.2 Funktion für die Kontrollfrage und Einstieg in die verschiedenen Output - Funktionen
 
 def popup(data):
     info_sound()
@@ -90,7 +93,7 @@ def popup(data):
         tki.Label(root, text=response)
 
 
-# 3.3 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld Adresse (überschreibt den Default Text) übernommen
+# 3.3 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld 'Adresse' (überschreibt den Default Text) übernommen
 # von https://www.tutorialspoint.com/how-to-clear-text-widget-content-while-clicking-on-the-entry-widget-itself-in
 # -tkinter
 
@@ -100,29 +103,29 @@ def click(event):  # es muss ein parameter in die Funktion übergeben werden
     adresse.unbind('<Button-1>', clicked)
 
 
-# 3.4 Funktion für die Generierung der Streetmap in einem zweiten Fenster
+# 3.4 Funktion für die Generierung der Streetmap in einem zweiten Fenster, falls angeklickt im radio-button
 
 def map_export():
-    # ggf. sind global variablen notwendig
+    # ggf. sind globale variablen notwendig um korrekt in das neue frame transportiert zu werden
     newframe = tki.Toplevel()
     newframe.title('Google Streetview')
     root.iconbitmap('./icon/gasstation_4334.ico')
 
 
-# 3.5 Funktion für die Generierung des cvs Exports falls gewählt
+# 3.5 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
 
 def cvs_export():
     pass
 
 
-# 3.6 Funktion für die Generierung des pdf Exports falls gewählt
+# 3.6 Funktion für die Generierung des pdf Exports, falls angeklickt im radio-button
 
 def pdf_export():
     pass
 
 
-# 3.7 Funktion um nur aktive Tankstellen anzuzeigen. Soll je nach Checkbox Status ein True (checked)
-# oder ein False returnen. Wird über die export Funktionen geprüft (if aktiv_checkbox() and aktiv_checkbox() == ..)
+# 3.7 Funktion, um nur aktive Tankstellen anzuzeigen. Soll je nach Checkbox Status ein True (checked)
+# oder ein False returnen. Wird über die export Funktionen geprüft (if aktiv_checkbox() is True ..)
 
 def aktiv_checkbox():
     if check_var.get() == 1:
@@ -156,7 +159,7 @@ root.title("PKI - Benzinpreisapp")  # bennent das Fenster
 root.geometry("550x600")  # setzt die Maße, Breite x Höhe
 root.iconbitmap('./icon/gasstation_4334.ico')  # Iconanpassung
 
-# Setzen der derzeitigen Postleitzahl im Adressfeld(näherungsweise)
+# Setzen der derzeitigen User-Postleitzahl im Adressfeld(näherungsweise)
 # Code von https://stackoverflow.com/questions/24906833/how-to-access-current-location-of-any-user-using-python
 # und https://gis.stackexchange.com/questions/352961/convert-lat-lon-to-zip-postal-code-using-python
 
@@ -173,7 +176,8 @@ pygame.mixer.music.set_volume(0.0079)
 pygame.mixer.music.play(loops=-1)  # unendlicher loop für die Hintergrundmusik
 
 # Einfügen eines Hintergrundbildes
-# Canvas sind grafische html-basierte Elemente
+# Canvas sind grafische html-basierte Elemente der TK Klasse
+
 bg = ImageTk.PhotoImage(Image.open("./icon/bg.jpg"))
 canvas = tki.Canvas(root)
 canvas.pack(fill="both", expand=True)
@@ -181,7 +185,7 @@ canvas.create_image(0, 0, image=bg, anchor="nw")
 
 # 1.2 Kreieren von Buttons
 
-# Kraftstoff - muss singlechoice Dropdown sein
+# 1.2.1 Kraftstoff - muss singlechoice Dropdown sein
 
 kraftstoff_liste = [
 
@@ -194,7 +198,7 @@ ks = tki.StringVar()
 ks.set("Kraftstoff wählen")
 kraftstoff = tki.OptionMenu(root, ks, *kraftstoff_liste)
 
-# Radius - muss singlechoice Dropdown sein
+# 1.2.2 Radius - muss singlechoice Dropdown sein
 
 radius_liste = [
 
@@ -209,14 +213,15 @@ r = tki.StringVar()
 r.set("Radius wählen")
 radius = tki.OptionMenu(root, r, *radius_liste)
 
-# PLZ/Ort - muss text-input Feld sein
+# 1.2.3 PLZ/Ort - muss text-input Feld sein
 
 adresse = tki.Entry(root, width=25, borderwidth=3)
-adresse.insert(0, zipcode)
+adresse.insert(0, zipcode) # setzt den Default Text (aktuelle PLZ)
 adresse.get()  # speichert den Input
-clicked = adresse.bind('<Button-1>', click)
+clicked = adresse.bind('<Button-1>', click) # ruft die click Funktion zur Löschung des Default - Textes auf
 
-# Ausgabeformat - muss singlechoice - klick ('radiobutton') sein (Wahl: CVS / PDF / Streetmap)
+# 1.2.4 Ausgabeformat - muss singlechoice - klick ('radiobutton') sein (Wahl: CVS / PDF / Streetmap)
+
 canvas.create_text(110, 145, text="Ausgabeformat wählen", fill="white", font='Helvetica 13 bold')
 
 radio_var = tki.IntVar()  # die Variable wird als ein Integer definiert, um später in einer Funktion mit
@@ -227,18 +232,22 @@ output_cvs = tki.Radiobutton(root, text="CVS", variable=radio_var,
 output_pdf = tki.Radiobutton(root, text="PDF", variable=radio_var, value=2)
 output_map = tki.Radiobutton(root, text="Streetmap", variable=radio_var, value=3)
 
-# Start und Ende - muss normaler Button sein
+# 1.2.5 Start und Ende - müssen 'normale' Buttons sein
+
 los = tki.Button(root, text="Los", padx=60, pady=60, \
                  command=los_button)  # Achtung, Funktion fehlt noch
 ende = tki.Button(root, text='Beenden', padx=60, pady=60, command=ende_button)
 
-# nur offene Tankstellen anzeigen - Checkbox Button
+# 1.2.6 nur offene Tankstellen anzeigen - Checkbox Button
+
 check_var = tki.IntVar()
 aktiv = tki.Checkbutton(root, width=20, text="nur geöffnete Tankstellen", variable=check_var, \
                         command=aktiv_checkbox)
 check_var.get()
 
-# 1.3 Plotten der Buttons in das root GUI - Fenster
+# 1.3 Plotten der Buttons in das root GUI - Fenster und mainloop
+# Es wurde mit place und manuellen Koordinatenübergabe gearbeitet. Alternativ wäre auch .pack() oder .grid mit row &
+# columns für die Platzierung möglich gewesen.
 
 adresse.place(x=20, y=20)
 radius.place(x=400, y=20)
