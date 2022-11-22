@@ -6,6 +6,7 @@
 # Import der benötigten Libraries
 
 import tkinter as tki
+from tkinter import ttk
 from PIL import ImageTk, Image
 from tkinter import messagebox
 import numpy as np
@@ -28,7 +29,7 @@ def ende_button():
     end_sound = pygame.mixer.Sound(".\sounds\Shutdown.mp3")
     end_sound.play()
     response = tki.messagebox.showinfo("Goodbye", "Auf Wiedersehen!")
-    tki.Label(root, text=response)
+    tki.Label(my_frame1, text=response)
     root.quit()
 
 
@@ -51,7 +52,7 @@ def los_button():
         # Ohne Verbindung zur Google API kann nominatim genutzt werden, die Funktion nimmt aber nur eine PLZ entgegen.
         # Daher erfolgt hier eine rudimentäre Validierung der Adresseingabe
 
-        if len(adresse.get()) == 5 and all(num in string.digits for num in adresse.get()): # checkt die Länge und ob
+        if len(adresse.get()) == 5 and all(num in string.digits for num in adresse.get()):  # checkt die Länge und ob
             # es sich um einen Zahlenstring handlet (string.digits = 0123456789)
             # Code von https://www.reddit.com/r/learnpython/comments/ljqyqr
             # /best_way_to_get_latitude_and_longitude_data_from/
@@ -78,7 +79,7 @@ def los_button():
 def popup(data):
     info_sound()
     response = tki.messagebox.askyesno("Bitte bestätigen", "Sind Sie mit der Auswahl einverstanden?")
-    tki.Label(root, text=response)
+    tki.Label(my_frame1, text=response)
     print(data)  # Testaufruf um Übergabe der PLZ zu testen
     if response == 1:
         if radio_var.get() == 1:
@@ -90,7 +91,7 @@ def popup(data):
     else:
         error_sound()
         response = tki.messagebox.showerror("Anfrage gestoppt", "Die Anfrage wurde abgebrochen. Bitte Daten prüfen")
-        tki.Label(root, text=response)
+        tki.Label(my_frame1, text=response)
 
 
 # 3.3 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld 'Adresse' (überschreibt den Default Text) übernommen
@@ -109,7 +110,7 @@ def map_export():
     # ggf. sind globale variablen notwendig um korrekt in das neue frame transportiert zu werden
     newframe = tki.Toplevel()
     newframe.title('Google Streetview')
-    root.iconbitmap('./icon/gasstation_4334.ico')
+    newframe.iconbitmap('./icon/gasstation_4334.ico')
 
 
 # 3.5 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
@@ -156,7 +157,7 @@ Das Erstellen dieser Objekte mit Tkinter ist ein zweistufiger Prozess - erst wir
 
 root = tki.Tk()  # erstellt das Root-Fenster für alle weiteren Widgets (d.h. Buttons etc)
 root.title("PKI - Benzinpreisapp")  # bennent das Fenster
-root.geometry("550x600")  # setzt die Maße, Breite x Höhe
+root.geometry("550x620")  # setzt die Maße, Breite x Höhe
 root.iconbitmap('./icon/gasstation_4334.ico')  # Iconanpassung
 
 # Setzen der derzeitigen User-Postleitzahl im Adressfeld(näherungsweise)
@@ -175,13 +176,29 @@ pygame.mixer.music.load(r".\sounds\background.mp3")
 pygame.mixer.music.set_volume(0.0079)
 pygame.mixer.music.play(loops=-1)  # unendlicher loop für die Hintergrundmusik
 
+# Setzen von verschiedenen Tabs mithilfe von TTK-Widgets
+
+my_notebook = ttk.Notebook(root)
+my_notebook.pack()
+my_frame1 = tki.Frame(my_notebook, width=550, height=600)
+my_frame2 = tki.Frame(my_notebook, width=550, height=600)
+
+my_frame1.pack(fill='both', expand=1)
+my_frame2.pack(fill='both', expand=1)
+
+my_notebook.add(my_frame1, text="Hauptfunktionen")
+my_notebook.add(my_frame2, text="Auswertungen")
+
+
 # Einfügen eines Hintergrundbildes
 # Canvas sind grafische html-basierte Elemente der TK Klasse
 
 bg = ImageTk.PhotoImage(Image.open("./icon/bg.jpg"))
-canvas = tki.Canvas(root)
+canvas = tki.Canvas(my_frame1)
 canvas.pack(fill="both", expand=True)
 canvas.create_image(0, 0, image=bg, anchor="nw")
+
+
 
 # 1.2 Kreieren von Buttons
 
@@ -196,7 +213,7 @@ kraftstoff_liste = [
 
 ks = tki.StringVar()
 ks.set("Kraftstoff wählen")
-kraftstoff = tki.OptionMenu(root, ks, *kraftstoff_liste)
+kraftstoff = tki.OptionMenu(my_frame1, ks, *kraftstoff_liste)
 
 # 1.2.2 Radius - muss singlechoice Dropdown sein
 
@@ -211,14 +228,14 @@ radius_liste = [
 
 r = tki.StringVar()
 r.set("Radius wählen")
-radius = tki.OptionMenu(root, r, *radius_liste)
+radius = tki.OptionMenu(my_frame1, r, *radius_liste)
 
 # 1.2.3 PLZ/Ort - muss text-input Feld sein
 
-adresse = tki.Entry(root, width=25, borderwidth=3)
-adresse.insert(0, zipcode) # setzt den Default Text (aktuelle PLZ)
+adresse = tki.Entry(my_frame1, width=25, borderwidth=3)
+adresse.insert(0, zipcode)  # setzt den Default Text (aktuelle PLZ)
 adresse.get()  # speichert den Input
-clicked = adresse.bind('<Button-1>', click) # ruft die click Funktion zur Löschung des Default - Textes auf
+clicked = adresse.bind('<Button-1>', click)  # ruft die click Funktion zur Löschung des Default - Textes auf
 
 # 1.2.4 Ausgabeformat - muss singlechoice - klick ('radiobutton') sein (Wahl: CVS / PDF / Streetmap)
 
@@ -227,21 +244,21 @@ canvas.create_text(110, 145, text="Ausgabeformat wählen", fill="white", font='H
 radio_var = tki.IntVar()  # die Variable wird als ein Integer definiert, um später in einer Funktion mit
 # Zahlen arbeiten zu können. Alternativ wäre z.B. auch StrVar() möglich, wenn der value "1" gewählt wird
 
-output_cvs = tki.Radiobutton(root, text="CVS", variable=radio_var,
+output_cvs = tki.Radiobutton(my_frame1, text="CVS", variable=radio_var,
                              value=1)  # Tkinter nutzt eine eigene Syntax für Variablen
-output_pdf = tki.Radiobutton(root, text="PDF", variable=radio_var, value=2)
-output_map = tki.Radiobutton(root, text="Streetmap", variable=radio_var, value=3)
+output_pdf = tki.Radiobutton(my_frame1, text="PDF", variable=radio_var, value=2)
+output_map = tki.Radiobutton(my_frame1, text="Streetmap", variable=radio_var, value=3)
 
 # 1.2.5 Start und Ende - müssen 'normale' Buttons sein
 
-los = tki.Button(root, text="Los", padx=60, pady=60, \
+los = tki.Button(my_frame1, text="Los", padx=60, pady=60, \
                  command=los_button)  # Achtung, Funktion fehlt noch
-ende = tki.Button(root, text='Beenden', padx=60, pady=60, command=ende_button)
+ende = tki.Button(my_frame1, text='Beenden', padx=60, pady=60, command=ende_button)
 
 # 1.2.6 nur offene Tankstellen anzeigen - Checkbox Button
 
 check_var = tki.IntVar()
-aktiv = tki.Checkbutton(root, width=20, text="nur geöffnete Tankstellen", variable=check_var, \
+aktiv = tki.Checkbutton(my_frame1, width=20, text="nur geöffnete Tankstellen", variable=check_var, \
                         command=aktiv_checkbox)
 check_var.get()
 
