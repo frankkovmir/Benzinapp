@@ -2,6 +2,7 @@
 # weiterhin genutzte Dokumentation: https://www.educba.com/python-tkinter/
 # https://www.python-kurs.eu/tkinter_canvas.php für grafische Elemente
 # Pygame Dokumentation für Sounds: https://www.pygame.org/docs/ref/mixer.html
+
 # Import der benötigten Libraries
 
 import tkinter as tki
@@ -11,6 +12,9 @@ import numpy as np
 import matplotlib
 import pygame
 import time  # ggf. notwendig für api unterbrechung bei spam
+import geocoder
+import geopy
+
 
 """
 Part 3 - Implementierung der Button - Funktionen
@@ -24,7 +28,7 @@ Part 3 - Implementierung der Button - Funktionen
 
 def los_button():
     # prüfen, dass radius und kraftstoff gewählt sind
-    # prüfen, dass adresse eine PLZ oder Ort + Straße ist
+    # prüfen, dass adresse eine PLZ ist
     # AdressLabel = tki.Label(root, text=adresse.get())  # ruft den gespeicherten Input auf
     popup()
 
@@ -112,6 +116,15 @@ root.title("PKI - Benzinpreisapp")  # bennent das Fenster
 root.geometry("550x600")  # setzt die Maße, Breite x Höhe
 root.iconbitmap('./icon/gasstation_4334.ico')  # Iconanpassung
 
+# Setzen der derzeitigen Postleitzahl im Adressfeld(näherungsweise)
+# Code von https://stackoverflow.com/questions/24906833/how-to-access-current-location-of-any-user-using-python
+# und https://gis.stackexchange.com/questions/352961/convert-lat-lon-to-zip-postal-code-using-python
+
+geocode = geocoder.ip('me') # holt die Koordinaten
+geo_locator = geopy.Nominatim(user_agent='1234')
+location = geo_locator.reverse(geocode.latlng)
+zipcode = location.raw['address']['postcode']
+
 # Hintergrundmusik
 
 pygame.mixer.init()  # initialisiert Sounds
@@ -161,7 +174,7 @@ r.get()
 # PLZ/Ort - muss text-input Feld sein
 
 adresse = tki.Entry(root, width=25, borderwidth=3)
-adresse.insert(0, "Hier bitte die PLZ eingeben")
+adresse.insert(0, zipcode)
 adresse.get()  # speichert den Input
 clicked = adresse.bind('<Button-1>', click)
 
@@ -178,13 +191,13 @@ output_map = tki.Radiobutton(root, text="Streetmap", variable=radio_var, value=3
 radio_var.get()
 
 # Start und Ende - muss normaler Button sein
-los = tki.Button(root, text="Los", padx=60, pady=60,\
+los = tki.Button(root, text="Los", padx=60, pady=60, \
                  command=los_button)  # Achtung, Funktion fehlt noch
 ende = tki.Button(root, text='Beenden', padx=60, pady=60, command=ende_button)
 
 # nur offene Tankstellen anzeigen - Checkbox Button
 check_var = tki.IntVar()
-aktiv = tki.Checkbutton(root, width=20, text="nur geöffnete Tankstellen", variable=check_var,\
+aktiv = tki.Checkbutton(root, width=20, text="nur geöffnete Tankstellen", variable=check_var, \
                         command=aktiv_checkbox)
 check_var.get()
 
