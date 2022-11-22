@@ -14,24 +14,15 @@ import pygame
 import time  # ggf. notwendig für api unterbrechung bei spam
 import geocoder
 import geopy
-
+import pgeocode
+import string
 
 """
 Part 3 - Implementierung der Button - Funktionen
 """
 
 
-# Generiert ein Pop-Up Window mit Kontrollfrage (1 = Ja, 0 = Nein), in Anlehnung an https://youtu.be/YXPyB4XeYLA?t=9133
-# showerror ggf. für Fehlerhandling
-
-# 3.1 Funktion für den Klick auf "Los". Erst werden Validierungen der Felder durchlaufen, danach Übergang in 3.1
-
-def los_button():
-    # prüfen, dass radius und kraftstoff gewählt sind
-    # prüfen, dass adresse eine PLZ ist
-    # AdressLabel = tki.Label(root, text=adresse.get())  # ruft den gespeicherten Input auf
-    popup()
-
+# 3.0 Funktion für den Beenden-Button
 
 def ende_button():
     end_sound = pygame.mixer.Sound(".\sounds\Shutdown.mp3")
@@ -41,13 +32,51 @@ def ende_button():
     root.quit()
 
 
+# 3.1 Funktion für den Klick auf "Los". Erst werden Validierungen der Felder durchlaufen, danach Übergang in 3.2
+# tki.messagebox Generiert ein Pop-Up Window (Ausgestaltung je nach Typ, infobox / errorbox / ja oder nein Box)
+# In Anlehnung an https://youtu.be/YXPyB4XeYLA?t=9133
+
+def los_button():
+    if radio_var and radio_var.get() == 0:
+        info_sound()
+        return tki.messagebox.showinfo("Fehlender Input", "Bitte ein Ausgabeformat angeben!")
+    if ks and ks.get() == 'Kraftstoff wählen':
+        info_sound()
+        return tki.messagebox.showinfo("Fehlender Input", "Bitte einen Kraftstoff angeben!")
+    if r and r.get() == 'Radius wählen':
+        info_sound()
+        return tki.messagebox.showinfo("Fehlender Input", "Bitte einen Radius angeben!")
+    if adresse and adresse.get():  # Validierung der Adressdaten (PLZ)
+        # im Api Aufruf muss die PLZ in lat / lng als float übergeben werden, siehe tankerkönig-api doc.
+        # Ohne Verbindung zur Google API kann nominatim genutzt werden, die Funktion nimmt aber nur eine PLZ entgegen.
+        # Daher erfolgt hier eine rudimentäre Validierung der Adresseingabe
+
+        if len(adresse.get()) == 5 and all(num in string.digits for num in adresse.get()):
+            nomi = pgeocode.Nominatim('de')
+            query = nomi.query_postal_code(adresse.get())
+            data = {
+                "lat": query["latitude"],
+                "lon": query["longitude"]
+            }
+            if data:  # extra Sicherheitsabfrage um die Übergabe eines leeren dicts und damit einen fehlerhaften Api-
+                # Aufruf zu vermeiden
+                return popup(data)  # Aufruf der nächsten Funktion und Übergabe der Koordinaten als Parameter
+        else:
+            error_sound()
+            tki.messagebox.showerror("Falscher Input", f"Die eingegebene Adresse '{adresse.get()}' ist keine "
+                                                       f"Postleitzahl in Deutschland")
+    else:
+        info_sound()
+        return tki.messagebox.showinfo("Fehlender Input", "Bitte eine Postleitzahl angeben!")
+
+
 # 3.2 Funktion für die Kontrollfrage und Einstieg in die Output - Funktionen
 
-def popup():
-    popup_sound = pygame.mixer.Sound(".\sounds\Control.mp3")
-    popup_sound.play()
+def popup(data):
+    info_sound()
     response = tki.messagebox.askyesno("Bitte bestätigen", "Sind Sie mit der Auswahl einverstanden?")
     tki.Label(root, text=response)
+    print(data)  # Testaufruf um Übergabe der PLZ zu testen
     if response == 1:
         if radio_var.get() == 1:
             cvs_export()
@@ -56,8 +85,7 @@ def popup():
         if radio_var.get() == 3:
             map_export()
     else:
-        error_sound = pygame.mixer.Sound(".\sounds\Windows.mp3")
-        error_sound.play()
+        error_sound()
         response = tki.messagebox.showerror("Anfrage gestoppt", "Die Anfrage wurde abgebrochen. Bitte Daten prüfen")
         tki.Label(root, text=response)
 
@@ -103,6 +131,18 @@ def aktiv_checkbox():
         return False
 
 
+# 3.8 Sound - Funktionen
+
+def info_sound():
+    info = pygame.mixer.Sound(".\sounds\Control.mp3")
+    info.play()
+
+
+def error_sound():
+    error = pygame.mixer.Sound(".\sounds\Windows.mp3")
+    error.play()
+
+
 """
 Part 1 - Erstellen des GUI und der benötigten Buttons / Tabs (Frank Kovmir)
 Das Erstellen dieser Objekte mit Tkinter ist ein zweistufiger Prozess - erst wird das "Widget" definiert
@@ -120,7 +160,7 @@ root.iconbitmap('./icon/gasstation_4334.ico')  # Iconanpassung
 # Code von https://stackoverflow.com/questions/24906833/how-to-access-current-location-of-any-user-using-python
 # und https://gis.stackexchange.com/questions/352961/convert-lat-lon-to-zip-postal-code-using-python
 
-geocode = geocoder.ip('me') # holt die Koordinaten
+geocode = geocoder.ip('me')  # holt die Koordinaten
 geo_locator = geopy.Nominatim(user_agent='1234')
 location = geo_locator.reverse(geocode.latlng)
 zipcode = location.raw['address']['postcode']
@@ -153,7 +193,6 @@ kraftstoff_liste = [
 ks = tki.StringVar()
 ks.set("Kraftstoff wählen")
 kraftstoff = tki.OptionMenu(root, ks, *kraftstoff_liste)
-ks.get()
 
 # Radius - muss singlechoice Dropdown sein
 
@@ -169,7 +208,6 @@ radius_liste = [
 r = tki.StringVar()
 r.set("Radius wählen")
 radius = tki.OptionMenu(root, r, *radius_liste)
-r.get()
 
 # PLZ/Ort - muss text-input Feld sein
 
@@ -188,7 +226,6 @@ output_cvs = tki.Radiobutton(root, text="CVS", variable=radio_var,
                              value=1)  # Tkinter nutzt eine eigene Syntax für Variablen
 output_pdf = tki.Radiobutton(root, text="PDF", variable=radio_var, value=2)
 output_map = tki.Radiobutton(root, text="Streetmap", variable=radio_var, value=3)
-radio_var.get()
 
 # Start und Ende - muss normaler Button sein
 los = tki.Button(root, text="Los", padx=60, pady=60, \
