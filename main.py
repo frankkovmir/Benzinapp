@@ -23,17 +23,18 @@ Part 3 - Implementierung der Button - Funktionen
 """
 
 
-# 3.0 Funktion für den Beenden-Button
+# 3.1.0 Funktionen für den Haupttab
+# 3.1.1 Funktion für den Beenden-Button
 
 def ende_button():
-    end_sound = pygame.mixer.Sound(".\sounds\Shutdown.mp3")
+    end_sound = pygame.mixer.Sound(r".\sounds\Shutdown.mp3")
     end_sound.play()
     response = tki.messagebox.showinfo("Goodbye", "Auf Wiedersehen!")
     tki.Label(tab1, text=response)
     tab1.quit()
 
 
-# 3.1 Funktion für den Klick auf "Los". Erst werden Validierungen der Felder durchlaufen, danach Übergang in 3.2
+# 3.1.2 Funktion für den Klick auf "Los". Erst werden Validierungen der Felder durchlaufen, danach Übergang in 3.2
 # tki.messagebox Generiert ein Pop-Up Window (Ausgestaltung je nach Typ, infobox / errorbox / ja oder nein Box)
 # In Anlehnung an https://youtu.be/YXPyB4XeYLA?t=9133
 
@@ -80,7 +81,7 @@ def los_button():
         return tki.messagebox.showinfo("Fehlender Input", "Bitte eine Postleitzahl angeben!")
 
 
-# 3.2 Funktion für die Kontrollfrage und Einstieg in die verschiedenen Output - Funktionen
+# 3.1.3 Funktion für die Kontrollfrage und Einstieg in die verschiedenen Output - Funktionen
 
 def popup(data):
     info_sound()
@@ -100,9 +101,9 @@ def popup(data):
         tki.Label(tab1, text=response)
 
 
-# 3.3 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld 'Adresse' (überschreibt den Default Text) übernommen
-# von https://www.tutorialspoint.com/how-to-clear-text-widget-content-while-clicking-on-the-entry-widget-itself-in
-# -tkinter
+# 3.1.4 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld 'Adresse' (überschreibt den Default Text)
+# übernommen von https://www.tutorialspoint.com/how-to-clear-text-widget-content-while-clicking-on-the-entry-widget
+# -itself-in -tkinter
 
 def click(event):  # es muss ein parameter in die Funktion übergeben werden
     adresse.configure()
@@ -110,7 +111,7 @@ def click(event):  # es muss ein parameter in die Funktion übergeben werden
     adresse.unbind('<Button-1>', clicked)
 
 
-# 3.4 Funktion für die Generierung der Streetmap in einem zweiten Fenster, falls angeklickt im radio-button
+# 3.1.5 Funktion für die Generierung der Streetmap in einem zweiten Fenster, falls angeklickt im radio-button
 
 def map_export():
     # ggf. sind globale variablen notwendig um korrekt in das neue frame transportiert zu werden
@@ -119,19 +120,19 @@ def map_export():
     newframe.iconbitmap('./icon/gasstation_4334.ico')
 
 
-# 3.5 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
+# 3.1.6 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
 
 def cvs_export():
     pass
 
 
-# 3.6 Funktion für die Generierung des pdf Exports, falls angeklickt im radio-button
+# 3.1.7 Funktion für die Generierung des pdf Exports, falls angeklickt im radio-button
 
 def pdf_export():
     pass
 
 
-# 3.7 Funktion, um nur aktive Tankstellen anzuzeigen. Soll je nach Checkbox Status ein True (checked)
+# 3.1.8 Funktion, um nur aktive Tankstellen anzuzeigen. Soll je nach Checkbox Status ein True (checked)
 # oder ein False returnen. Wird über die export Funktionen geprüft (if aktiv_checkbox() is True ..)
 
 def aktiv_checkbox():
@@ -141,16 +142,23 @@ def aktiv_checkbox():
         return False
 
 
-# 3.8 Sound - Funktionen
+# 3.1.9 Sound - Funktionen
 
 def info_sound():
-    info = pygame.mixer.Sound(".\sounds\Control.mp3")
+    info = pygame.mixer.Sound(r".\sounds\Control.mp3")
     info.play()
 
 
 def error_sound():
-    error = pygame.mixer.Sound(".\sounds\Windows.mp3")
+    error = pygame.mixer.Sound(r".\sounds\Windows.mp3")
     error.play()
+
+
+# 3.1.0 Funktionen für den Prognose und Historie - Tab
+# 3.1.1 Funktion für den Los-Button
+
+def los2_button():
+    pass
 
 
 """
@@ -187,7 +195,7 @@ pygame.mixer.music.play(loops=-1)  # unendlicher loop für die Hintergrundmusik
 notebook = ttk.Notebook(root)  # TTK Widget, ist quasi ein Array / eine Sammlung von Widgets
 tab1 = tki.Frame(notebook)  # Frame für Tab 1
 tab2 = tki.Frame(notebook)  # Frame für Tab 2
-notebook.add(tab1, text="Hauptfunktionen") # Füllt die Tabs in das kreierte Notebook
+notebook.add(tab1, text="Hauptfunktionen")  # Füllt die Tabs in das kreierte Notebook
 notebook.add(tab2, text="Historie und Prognosen")
 notebook.pack(expand=True, fill="both")
 
@@ -254,7 +262,7 @@ output_map = tki.Radiobutton(tab1, text="Streetmap", variable=radio_var, value=3
 
 # 1.2.5 Start und Ende - müssen 'normale' Buttons sein
 
-los = tki.Button(tab1, text="Los", padx=60, pady=60, \
+los = tki.Button(tab1, text="Los", padx=80, pady=60, \
                  command=los_button)  # Achtung, Funktion fehlt noch
 ende = tki.Button(tab1, text='Beenden', padx=60, pady=60, command=ende_button)
 
@@ -265,13 +273,23 @@ aktiv = tki.Checkbutton(tab1, width=20, text="nur geöffnete Tankstellen", varia
                         command=aktiv_checkbox)
 check_var.get()
 
-
 # 1.3 Kreieren von Historie und Prognose-Buttons
-# 1.3.1 Kraftstoff - muss singlechoice Dropdown sein
+# 1.3.1 Start und Ende - müssen 'normale' Buttons sein
 
-# kommt
+los2 = tki.Button(tab2, text="Los", padx=80, pady=60, \
+                  command=los2_button)  # Achtung, Funktion fehlt noch
+ende2 = tki.Button(tab2, text='Beenden', padx=60, pady=60, command=ende_button)
 
-# 1.4 Plotten der Buttons in das root GUI - Fenster und mainloop
+# 1.3.2 Dropdown für Historie (1 W, 1M, 1J)
+#folgt
+
+# 1.3.3 Radiobuttons für Preisprognose (Diesel, Super, Super E10) des nächsten Tages
+#folgt
+
+# Outputs für Historie jeweils als Grafik in neuem Fenster
+# Outputs für Prognose jeweils als Textfeld Hinweis
+
+# 1.4 Plotten der Hauptfunktions - Buttons in das Tab 1 GUI - Fenster
 # Es wurde mit place und manuellen Koordinatenübergabe gearbeitet. Alternativ wäre auch .pack() oder .grid mit row &
 # columns für die Platzierung möglich gewesen.
 
@@ -281,8 +299,15 @@ kraftstoff.place(x=230, y=20)
 output_cvs.place(x=20, y=190)
 output_pdf.place(x=20, y=240)
 output_map.place(x=20, y=290)
-los.place(x=380, y=430)
+los.place(x=340, y=430)
 ende.place(x=20, y=430)
 aktiv.place(x=20, y=80)
+
+# 1.5 Plotten der Historie und Prognose - Buttons in das Tab 2 GUI - Fenster
+
+los2.place(x=340, y=430)
+ende2.place(x=20, y=430)
+
+# 1.6 Mainloop
 
 root.mainloop()  # führt eine Endlosschleife durch (startet das sichtbare GUI-Fenster)
