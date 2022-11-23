@@ -29,8 +29,8 @@ def ende_button():
     end_sound = pygame.mixer.Sound(".\sounds\Shutdown.mp3")
     end_sound.play()
     response = tki.messagebox.showinfo("Goodbye", "Auf Wiedersehen!")
-    tki.Label(root, text=response)
-    root.quit()
+    tki.Label(tab1, text=response)
+    tab1.quit()
 
 
 # 3.1 Funktion für den Klick auf "Los". Erst werden Validierungen der Felder durchlaufen, danach Übergang in 3.2
@@ -85,7 +85,7 @@ def los_button():
 def popup(data):
     info_sound()
     response = tki.messagebox.askyesno("Bitte bestätigen", "Sind Sie mit der Auswahl einverstanden?")
-    tki.Label(root, text=response)
+    tki.Label(tab1, text=response)
     print(data)  # Testaufruf um Übergabe der PLZ zu testen
     if response == 1:
         if radio_var.get() == 1:
@@ -97,7 +97,7 @@ def popup(data):
     else:
         error_sound()
         response = tki.messagebox.showerror("Anfrage gestoppt", "Die Anfrage wurde abgebrochen. Bitte Daten prüfen")
-        tki.Label(root, text=response)
+        tki.Label(tab1, text=response)
 
 
 # 3.3 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld 'Adresse' (überschreibt den Default Text) übernommen
@@ -163,10 +163,8 @@ Das Erstellen dieser Objekte mit Tkinter ist ein zweistufiger Prozess - erst wir
 
 root = tki.Tk()  # erstellt das Root-Fenster für alle weiteren Widgets (d.h. Buttons etc)
 root.title("PKI - Benzinpreisapp")  # bennent das Fenster
-root.geometry("550x600")  # setzt die Maße, Breite x Höhe
+root.geometry("550x620")  # setzt die Maße, Breite x Höhe
 root.iconbitmap('./icon/gasstation_4334.ico')  # Iconanpassung
-
-
 
 # Setzen der derzeitigen User-Postleitzahl im Adressfeld(näherungsweise)
 # Code von https://stackoverflow.com/questions/24906833/how-to-access-current-location-of-any-user-using-python
@@ -186,17 +184,27 @@ pygame.mixer.music.play(loops=-1)  # unendlicher loop für die Hintergrundmusik
 
 # Setzen von verschiedenen Tabs mithilfe von TTK-Widgets
 
+notebook = ttk.Notebook(root)  # TTK Widget, ist quasi ein Array / eine Sammlung von Widgets
+tab1 = tki.Frame(notebook)  # Frame für Tab 1
+tab2 = tki.Frame(notebook)  # Frame für Tab 2
+notebook.add(tab1, text="Hauptfunktionen") # Füllt die Tabs in das kreierte Notebook
+notebook.add(tab2, text="Historie und Prognosen")
+notebook.pack(expand=True, fill="both")
 
 # Einfügen eines Hintergrundbildes
 # Canvas sind grafische html-basierte Elemente der TK Klasse
 
 bg = ImageTk.PhotoImage(Image.open("./icon/bg.jpg"))
-canvas = tki.Canvas(root)
+canvas = tki.Canvas(tab1)
 canvas.pack(fill="both", expand=True)
 canvas.create_image(0, 0, image=bg, anchor="nw")
 
-# 1.2 Kreieren von Buttons
+bg2 = ImageTk.PhotoImage(Image.open("./icon/graph.jpg"))
+canvas2 = tki.Canvas(tab2)
+canvas2.pack(fill="both", expand=True)
+canvas2.create_image(0, 0, image=bg2, anchor="nw")
 
+# 1.2 Kreieren von Hauptfunktions-Buttons
 # 1.2.1 Kraftstoff - muss singlechoice Dropdown sein
 
 kraftstoff_liste = [
@@ -208,7 +216,7 @@ kraftstoff_liste = [
 
 ks = tki.StringVar()
 ks.set("Kraftstoff wählen")
-kraftstoff = tki.OptionMenu(root, ks, *kraftstoff_liste)
+kraftstoff = tki.OptionMenu(tab1, ks, *kraftstoff_liste)
 
 # 1.2.2 Radius - muss singlechoice Dropdown sein
 
@@ -223,11 +231,11 @@ radius_liste = [
 
 r = tki.StringVar()
 r.set("Radius wählen")
-radius = tki.OptionMenu(root, r, *radius_liste)
+radius = tki.OptionMenu(tab1, r, *radius_liste)
 
 # 1.2.3 PLZ/Ort - muss text-input Feld sein
 
-adresse = tki.Entry(root, width=25, borderwidth=3)
+adresse = tki.Entry(tab1, width=25, borderwidth=3)
 adresse.insert(0, zipcode)  # setzt den Default Text (aktuelle PLZ)
 adresse.get()  # speichert den Input
 clicked = adresse.bind('<Button-1>', click)  # ruft die click Funktion zur Löschung des Default - Textes auf
@@ -239,25 +247,31 @@ canvas.create_text(110, 145, text="Ausgabeformat wählen", fill="white", font='H
 radio_var = tki.IntVar()  # die Variable wird als ein Integer definiert, um später in einer Funktion mit
 # Zahlen arbeiten zu können. Alternativ wäre z.B. auch StrVar() möglich, wenn der value "1" gewählt wird
 
-output_cvs = tki.Radiobutton(root, text="CVS", variable=radio_var,
+output_cvs = tki.Radiobutton(tab1, text="CVS", variable=radio_var,
                              value=1)  # Tkinter nutzt eine eigene Syntax für Variablen
-output_pdf = tki.Radiobutton(root, text="PDF", variable=radio_var, value=2)
-output_map = tki.Radiobutton(root, text="Streetmap", variable=radio_var, value=3)
+output_pdf = tki.Radiobutton(tab1, text="PDF", variable=radio_var, value=2)
+output_map = tki.Radiobutton(tab1, text="Streetmap", variable=radio_var, value=3)
 
 # 1.2.5 Start und Ende - müssen 'normale' Buttons sein
 
-los = tki.Button(root, text="Los", padx=60, pady=60, \
+los = tki.Button(tab1, text="Los", padx=60, pady=60, \
                  command=los_button)  # Achtung, Funktion fehlt noch
-ende = tki.Button(root, text='Beenden', padx=60, pady=60, command=ende_button)
+ende = tki.Button(tab1, text='Beenden', padx=60, pady=60, command=ende_button)
 
 # 1.2.6 nur offene Tankstellen anzeigen - Checkbox Button
 
 check_var = tki.IntVar()
-aktiv = tki.Checkbutton(root, width=20, text="nur geöffnete Tankstellen", variable=check_var, \
+aktiv = tki.Checkbutton(tab1, width=20, text="nur geöffnete Tankstellen", variable=check_var, \
                         command=aktiv_checkbox)
 check_var.get()
 
-# 1.3 Plotten der Buttons in das root GUI - Fenster und mainloop
+
+# 1.3 Kreieren von Historie und Prognose-Buttons
+# 1.3.1 Kraftstoff - muss singlechoice Dropdown sein
+
+# kommt
+
+# 1.4 Plotten der Buttons in das root GUI - Fenster und mainloop
 # Es wurde mit place und manuellen Koordinatenübergabe gearbeitet. Alternativ wäre auch .pack() oder .grid mit row &
 # columns für die Platzierung möglich gewesen.
 
