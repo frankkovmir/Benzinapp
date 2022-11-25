@@ -17,9 +17,13 @@ import geocoder
 import geopy
 import pgeocode
 import string
+import requests
+import json
+
+
 
 """
-Part 3 - Implementierung der Button - Funktionen
+Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
 """
 
 
@@ -31,7 +35,7 @@ def ende_button():
     end_sound.play()
     response = tki.messagebox.showinfo("Goodbye", "Auf Wiedersehen!")
     tki.Label(tab1, text=response)
-    tab1.quit()
+    root.quit()
 
 
 # 3.1.2 Funktion für den Klick auf "Los". Erst werden Validierungen der Felder durchlaufen, danach Übergang in 3.2
@@ -54,7 +58,7 @@ def los_button():
         # Daher erfolgt hier eine rudimentäre Validierung der Adresseingabe
 
         if len(adresse.get()) == 5 and all(num in string.digits for num in adresse.get()):  # checkt die Länge und ob
-            # es sich um einen Zahlenstring handlet (string.digits = 0123456789)
+            # es sich um einen Zahlenstring handelt (string.digits = 0123456789)
             # Code von https://www.reddit.com/r/learnpython/comments/ljqyqr
             # /best_way_to_get_latitude_and_longitude_data_from/
             nomi = pgeocode.Nominatim('de')
@@ -75,33 +79,90 @@ def los_button():
         else:
             error_sound()
             tki.messagebox.showerror("Falscher Input", f"Die eingegebene Adresse '{adresse.get()}' ist keine "
-                                                       f"Postleitzahl in Deutschland")
+                                                       f"Postleitzahl")
     else:
         info_sound()
         return tki.messagebox.showinfo("Fehlender Input", "Bitte eine Postleitzahl angeben!")
 
 
-# 3.1.3 Funktion für die Kontrollfrage und Einstieg in die verschiedenen Output - Funktionen
+# 3.1.3 Funktion für die Kontrollfrage
 
 def popup(data):
     info_sound()
     response = tki.messagebox.askyesno("Bitte bestätigen", "Sind Sie mit der Auswahl einverstanden?")
     tki.Label(tab1, text=response)
-    print(data)  # Testaufruf um Übergabe der PLZ zu testen
+    print(data)
+    print(data['lat'])  # Testaufruf um Übergabe der PLZ zu testen
+    print(data['lon'])
     if response == 1:
-        if radio_var.get() == 1:
-            cvs_export()
-        if radio_var.get() == 2:
-            pdf_export()
-        if radio_var.get() == 3:
-            map_export()
+        api_check(data)
     else:
         error_sound()
         response = tki.messagebox.showerror("Anfrage gestoppt", "Die Anfrage wurde abgebrochen. Bitte Daten prüfen")
         tki.Label(tab1, text=response)
 
+# 3.1.4 Funktion für den Einstieg in die Generierungsfunktionen, baut API Verbindung auf
 
-# 3.1.4 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld 'Adresse' (überschreibt den Default Text)
+def api_check(data):
+
+    """
+    Part 2 - Aufruf der API
+    """
+
+    # https://creativecommons.tankerkoenig.de/
+    # Dein API-Key ist c7f5f8e5-e352-81d0-7d49-996d13f53d26
+
+    key = "c7f5f8e5-e352-81d0-7d49-996d13f53d26"
+    # Code für radius von https://stackoverflow.com/questions/1450897/remove-characters-except-digits-from-string
+    # -using-python. Es wandelt den Radius-Input (zB 5km) in ein Float Objekt für den Api Aufruf um, siehe Doku
+    radius = float(''.join(filter(str.isdigit, r.get())))
+    #print(radius)
+    kraftstoff_dict = {'Diesel': 'diesel', 'Super': 'e5', 'Super E10': 'e10'} # wandelt den Kraftstoff-Input (Diesel)
+    # in den vom Api unterstützen String um
+    kraftstoff = kraftstoff_dict[ks.get()]
+    active_flag = aktiv_checkbox()
+    open_list = []
+    full_list = []
+    #print(kraftstoff)
+    try:
+        api_request = requests.get(
+            f"https://creativecommons.tankerkoenig.de/json/list.php?lat={data['lat']}&lng={data['lon']}&rad={radius}&sort=dist&type={kraftstoff}&apikey={key}")
+        api = json.loads(api_request.content)
+    except Exception as e:
+        api = f"Error..{e}"
+
+    # API Troubleshooting falls ok == False (z.B. wenn Website down, Key tot .. )
+    if api and api['ok'] is False:
+        info_sound()
+        return tki.messagebox.showinfo("Fehler in der Verbindung", api["message"])
+
+    #print(api)
+
+    for i in api["stations"]:
+        if active_flag:
+            if not i["isOpen"]:
+                continue
+            else:
+                open_list.append(i)
+        else:
+            full_list.append(i)
+
+    #print(len(open_list))
+    #print(len(full_list))
+
+
+    # Einstieg in die weiteren Funktionen, hier muss noch dafür gesorgt werden, dass in Abhängigkeit vom active Flag
+    # die korrekte Liste in die Funktionen übergeben wird (open, oder full)
+
+    if radio_var.get() == 1:
+        cvs_export()
+    if radio_var.get() == 2:
+        pdf_export()
+    if radio_var.get() == 3:
+        map_export()
+
+
+# 3.1.5 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld 'Adresse' (überschreibt den Default Text)
 # übernommen von https://www.tutorialspoint.com/how-to-clear-text-widget-content-while-clicking-on-the-entry-widget
 # -itself-in -tkinter
 
@@ -111,7 +172,7 @@ def click(event):  # es muss ein parameter in die Funktion übergeben werden
     adresse.unbind('<Button-1>', clicked)
 
 
-# 3.1.5 Funktion für die Generierung der Streetmap in einem zweiten Fenster, falls angeklickt im radio-button
+# 3.1.6 Funktion für die Generierung der Streetmap in einem zweiten Fenster, falls angeklickt im radio-button
 
 def map_export():
     # ggf. sind globale variablen notwendig um korrekt in das neue frame transportiert zu werden
@@ -120,19 +181,19 @@ def map_export():
     newframe.iconbitmap('./icon/gasstation_4334.ico')
 
 
-# 3.1.6 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
+# 3.1.7 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
 
 def cvs_export():
     pass
 
 
-# 3.1.7 Funktion für die Generierung des pdf Exports, falls angeklickt im radio-button
+# 3.1.8 Funktion für die Generierung des pdf Exports, falls angeklickt im radio-button
 
 def pdf_export():
     pass
 
 
-# 3.1.8 Funktion, um nur aktive Tankstellen anzuzeigen. Soll je nach Checkbox Status ein True (checked)
+# 3.1.9 Funktion, um nur aktive Tankstellen anzuzeigen. Soll je nach Checkbox Status ein True (checked)
 # oder ein False returnen. Wird über die export Funktionen geprüft (if aktiv_checkbox() is True ..)
 
 def aktiv_checkbox():
@@ -154,8 +215,8 @@ def error_sound():
     error.play()
 
 
-# 3.1.0 Funktionen für den Prognose und Historie - Tab
-# 3.1.1 Funktion für den Los-Button
+# 3.2.0 Funktionen für den Prognose und Historie - Tab
+# 3.2.1 Funktion für den Los-Button
 
 def los2_button():
     pass
@@ -170,7 +231,7 @@ Das Erstellen dieser Objekte mit Tkinter ist ein zweistufiger Prozess - erst wir
 # 1.1 Initiieren der Standardbefehle
 
 root = tki.Tk()  # erstellt das Root-Fenster für alle weiteren Widgets (d.h. Buttons etc)
-root.title("PKI - Benzinpreisapp")  # bennent das Fenster
+root.title("PKI - Fuel Guru")  # bennent das Fenster
 root.geometry("550x620")  # setzt die Maße, Breite x Höhe
 root.iconbitmap('./icon/gasstation_4334.ico')  # Iconanpassung
 
@@ -263,7 +324,7 @@ output_map = tki.Radiobutton(tab1, text="Streetmap", variable=radio_var, value=3
 # 1.2.5 Start und Ende - müssen 'normale' Buttons sein
 
 los = tki.Button(tab1, text="Los", padx=80, pady=60, \
-                 command=los_button)  # Achtung, Funktion fehlt noch
+                 command=los_button)
 ende = tki.Button(tab1, text='Beenden', padx=60, pady=60, command=ende_button)
 
 # 1.2.6 nur offene Tankstellen anzeigen - Checkbox Button
@@ -303,7 +364,7 @@ los.place(x=340, y=430)
 ende.place(x=20, y=430)
 aktiv.place(x=20, y=80)
 
-# 1.5 Plotten der Historie und Prognose - Buttons in das Tab 2 GUI - Fenster
+# 1.5 Plotten der Historie und Prognose - Buttons in das Tab 2 des GUI - Fensters
 
 los2.place(x=340, y=430)
 ende2.place(x=20, y=430)
