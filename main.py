@@ -132,23 +132,23 @@ def api_check(data):
         api = f"Error..{e}"
 
     # API Troubleshooting falls ok == False (z.B. wenn Website down, Key tot .. )
-    if api and api['ok'] is False:
+    if api and api.get('ok') is False:
         info_sound()
-        return tki.messagebox.showinfo("Fehler in der Verbindung", api["message"])
+        return tki.messagebox.showinfo("Fehler in der Verbindung", api.get("message"))
 
-    #print(api)
+    print(api)
 
-    for i in api["stations"]:
+    for i in api.get("stations"):
         if active_flag:
-            if not i["isOpen"]:
+            if not i.get("isOpen"):
                 continue
             else:
                 open_list.append(i)
         else:
             full_list.append(i)
 
-    #print(len(open_list))
-    #print(len(full_list))
+    print(len(open_list))
+    print(len(full_list))
 
 
     # Einstieg in die weiteren Funktionen, hier muss noch dafür gesorgt werden, dass in Abhängigkeit vom active Flag
