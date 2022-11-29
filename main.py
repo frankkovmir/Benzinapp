@@ -147,19 +147,25 @@ def api_check(data):
         else:
             full_list.append(i)
 
-    print(len(open_list))
-    print(len(full_list))
+    #print(open_list)
+    #print(full_list)
+
+    new_list = []
+    if len(open_list) <= 0:
+        new_list = full_list
+    else:
+        new_list = open_list
 
 
     # Einstieg in die weiteren Funktionen, hier muss noch dafür gesorgt werden, dass in Abhängigkeit vom active Flag
     # die korrekte Liste in die Funktionen übergeben wird (open, oder full)
 
     if radio_var.get() == 1:
-        cvs_export()
+        cvs_export(new_list)
     if radio_var.get() == 2:
-        pdf_export()
+        pdf_export(new_list)
     if radio_var.get() == 3:
-        map_export()
+        map_export(new_list)
 
 
 # 3.1.5 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld 'Adresse' (überschreibt den Default Text)
@@ -174,7 +180,7 @@ def click(event):  # es muss ein parameter in die Funktion übergeben werden
 
 # 3.1.6 Funktion für die Generierung der Streetmap in einem zweiten Fenster, falls angeklickt im radio-button
 
-def map_export():
+def map_export(new_list):
     # ggf. sind globale variablen notwendig um korrekt in das neue frame transportiert zu werden
     newframe = tki.Toplevel()
     newframe.title('Google Streetview')
@@ -183,13 +189,13 @@ def map_export():
 
 # 3.1.7 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
 
-def cvs_export():
+def cvs_export(new_list):
     pass
 
 
 # 3.1.8 Funktion für die Generierung des pdf Exports, falls angeklickt im radio-button
 
-def pdf_export():
+def pdf_export(new_list):
     pass
 
 
