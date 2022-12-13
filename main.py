@@ -2,7 +2,7 @@
 # weiterhin genutzte Dokumentation: https://www.educba.com/python-tkinter/
 # https://www.python-kurs.eu/tkinter_canvas.php für grafische Elemente
 # Pygame Dokumentation für Sounds: https://www.pygame.org/docs/ref/mixer.html
-
+import tkinter
 # Import der benötigten Libraries
 
 import tkinter as tki
@@ -19,6 +19,8 @@ import pgeocode
 import string
 import requests
 import json
+import tkintermapview
+
 
 #frankchange
 
@@ -94,6 +96,7 @@ def popup(data):
     print(data)
     print(data['lat'])  # Testaufruf um Übergabe der PLZ zu testen
     print(data['lon'])
+
     if response == 1:
         api_check(data)
     else:
@@ -147,6 +150,8 @@ def api_check(data):
         else:
             full_list.append(i)
 
+    full_list.append(data)
+
     #print(open_list)
     #print(full_list)
 
@@ -165,7 +170,7 @@ def api_check(data):
     if radio_var.get() == 2:
         pdf_export(new_list)
     if radio_var.get() == 3:
-        map_export(new_list)
+        map_export(new_list)  # data einfügen
 
 
 # 3.1.5 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld 'Adresse' (überschreibt den Default Text)
@@ -183,8 +188,27 @@ def click(event):  # es muss ein parameter in die Funktion übergeben werden
 def map_export(new_list):
     # ggf. sind globale variablen notwendig um korrekt in das neue frame transportiert zu werden
     newframe = tki.Toplevel()
-    newframe.title('Google Streetview')
+    newframe.title('Mapview')
     newframe.iconbitmap('./icon/gasstation_4334.ico')
+    newframe.geometry(f"{800}x{600}")
+
+    karte = tkintermapview.TkinterMapView(newframe, width=800, height=600, corner_radius=0)
+    karte.place(relx=0.5, rely=0.5, anchor = tkinter.CENTER)
+
+    aktuelle_Location = (new_list[-1])
+
+    karte.set_position(aktuelle_Location['lat'], aktuelle_Location['lon'])
+    karte.set_zoom(13)   # Zoom muss an Radius angepasst sein !
+
+    new_list.pop()
+
+    for s in new_list:
+        gas_station = s
+        karte.set_marker(gas_station["lat"], gas_station["lng"], text=gas_station["name"])
+
+
+
+    # Den Preis anzeigen und möglicherweise die Route auswählen können
 
 
 # 3.1.7 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
