@@ -31,11 +31,16 @@ Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
 # 3.1.1 Funktion für den Beenden-Button
 
 def ende_button():
+    """Implementiert die Funktion für den Beenden-Button
+    Returns:
+        Beendet die root loop Funktion
+    """
+
     end_sound = pygame.mixer.Sound(r".\sounds\Shutdown.mp3")
     end_sound.play()
     response = tki.messagebox.showinfo("Goodbye", "Auf Wiedersehen!")
     tki.Label(tab1, text=response)
-    root.quit()
+    return root.quit()
 
 
 # 3.1.2 Funktion für den Klick auf "Los". Erst werden Validierungen der Felder durchlaufen, danach Übergang in 3.2
@@ -43,6 +48,11 @@ def ende_button():
 # In Anlehnung an https://youtu.be/YXPyB4XeYLA?t=9133
 
 def los_button():
+    """Führt Input - Validierungen durch und prüft die Vollständigkeit / Korrektheit der übergebenen Daten
+        Returns:
+            Führt entweder in die nachfolgende Funktion oder beendet mit einer Messagebox (Error, Hinweis)
+    """
+
     if radio_var and radio_var.get() == 0:
         info_sound()
         return tki.messagebox.showinfo("Fehlender Input", "Bitte ein Ausgabeformat angeben!")
@@ -74,11 +84,11 @@ def los_button():
 
             else:
                 error_sound()
-                tki.messagebox.showerror("Falscher Input", f"Die eingegebene Adresse '{adresse.get()}' ist keine "
+                return tki.messagebox.showerror("Falscher Input", f"Die eingegebene Adresse '{adresse.get()}' ist keine "
                                                            f"Postleitzahl in Deutschland")
         else:
             error_sound()
-            tki.messagebox.showerror("Falscher Input", f"Die eingegebene Adresse '{adresse.get()}' ist keine "
+            return tki.messagebox.showerror("Falscher Input", f"Die eingegebene Adresse '{adresse.get()}' ist keine "
                                                        f"Postleitzahl")
     else:
         info_sound()
@@ -88,25 +98,36 @@ def los_button():
 # 3.1.3 Funktion für die Kontrollfrage
 
 def popup(data):
+    """Initiiert eine abschließende Ja/Nein Frage, vor dem Stellen der Anfrage an die API
+    Input:
+        Data Numy-Dictionary mit der Longitude / Langitude aus der Funktion los_button
+    Returns:
+        Ruft bei Positiver Checkbox-Auswahl die api_check Funktion auf und übergibt das Data-Dict.
+    """
+
     info_sound()
     response = tki.messagebox.askyesno("Bitte bestätigen", "Sind Sie mit der Auswahl einverstanden?")
     tki.Label(tab1, text=response)
-    print(data)
-    print(data['lat'])  # Testaufruf um Übergabe der PLZ zu testen
-    print(data['lon'])
+
     if response == 1:
-        api_check(data)
+        return api_check(data)
     else:
         error_sound()
         response = tki.messagebox.showerror("Anfrage gestoppt", "Die Anfrage wurde abgebrochen. Bitte Daten prüfen")
         tki.Label(tab1, text=response)
+        return
 
 # 3.1.4 Funktion für den Einstieg in die Generierungsfunktionen, baut API Verbindung auf
 
 def api_check(data):
+    """Part 2 - Aufruf der API
 
-    """
-    Part 2 - Aufruf der API
+    Baut den API-Aufruf auf und führt diesen durch.
+    Input:
+        Data Numy-Dictionary mit der Longitude / Langitude aus der Funktion popup
+    Returns:
+        Beendet die Funktion bei einem nicht-erfolgreichen API-Aufruf, oder verzweigt
+        in eine der Output-Funktionen (mit Uebergabe des Ergebnisses aus dem API-Aufruf)
     """
 
     # https://creativecommons.tankerkoenig.de/
@@ -116,14 +137,12 @@ def api_check(data):
     # Code für radius von https://stackoverflow.com/questions/1450897/remove-characters-except-digits-from-string
     # -using-python. Es wandelt den Radius-Input (zB 5km) in ein Float Objekt für den Api Aufruf um, siehe Doku
     radius = float(''.join(filter(str.isdigit, r.get())))
-    #print(radius)
     kraftstoff_dict = {'Diesel': 'diesel', 'Super': 'e5', 'Super E10': 'e10'} # wandelt den Kraftstoff-Input (Diesel)
     # in den vom Api unterstützen String um
     kraftstoff = kraftstoff_dict[ks.get()]
     active_flag = aktiv_checkbox()
     open_list = []
     full_list = []
-    #print(kraftstoff)
     try:
         api_request = requests.get(
             f"https://creativecommons.tankerkoenig.de/json/list.php?lat={data['lat']}&lng={data['lon']}&rad={radius}&sort=dist&type={kraftstoff}&apikey={key}")
@@ -136,8 +155,6 @@ def api_check(data):
         info_sound()
         return tki.messagebox.showinfo("Fehler in der Verbindung", api.get("message"))
 
-    print(api)
-
     for i in api.get("stations"):
         if active_flag:
             if not i.get("isOpen"):
@@ -146,9 +163,6 @@ def api_check(data):
                 open_list.append(i)
         else:
             full_list.append(i)
-
-    #print(open_list)
-    #print(full_list)
 
     new_list = []
     if len(open_list) <= 0:
@@ -161,11 +175,11 @@ def api_check(data):
     # die korrekte Liste in die Funktionen übergeben wird (open, oder full)
 
     if radio_var.get() == 1:
-        cvs_export(new_list)
+        return cvs_export(new_list)
     if radio_var.get() == 2:
-        pdf_export(new_list)
+        return pdf_export(new_list)
     if radio_var.get() == 3:
-        map_export(new_list)
+        return map_export(new_list)
 
 
 # 3.1.5 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld 'Adresse' (überschreibt den Default Text)
@@ -173,14 +187,28 @@ def api_check(data):
 # -itself-in -tkinter
 
 def click(event):  # es muss ein parameter in die Funktion übergeben werden
+    """Sorgt für eine Leerung des Adress-Feldes beim initialen Klick in das Feld
+    Input:
+        Event-Parameter
+    Returns:
+        kein Return-Wert
+    """
+
     adresse.configure()
     adresse.delete(0, tki.END)
-    adresse.unbind('<Button-1>', clicked)
+    return adresse.unbind('<Button-1>', clicked)
 
 
 # 3.1.6 Funktion für die Generierung der Streetmap in einem zweiten Fenster, falls angeklickt im radio-button
 
 def map_export(new_list):
+    """Startet ein neues Fenster in TKinter für die Map-Ausgabe
+    Input:
+        Liste aus der api_check Funktion
+    Returns:
+        kein Return-Wert
+    """
+
     # ggf. sind globale variablen notwendig um korrekt in das neue frame transportiert zu werden
     newframe = tki.Toplevel()
     newframe.title('Google Streetview')
@@ -190,12 +218,26 @@ def map_export(new_list):
 # 3.1.7 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
 
 def cvs_export(new_list):
+    """Funktion für die Ergebnisausgabe im CVS-Format
+    Input:
+        Liste aus der api_check Funktion
+    Returns:
+        kein Return-Wert
+    """
+
     pass
 
 
 # 3.1.8 Funktion für die Generierung des pdf Exports, falls angeklickt im radio-button
 
 def pdf_export(new_list):
+    """Funktion für die Ergebnisausgabe im PDF-Format
+    Input:
+        Liste aus der api_check Funktion
+    Returns:
+        kein Return-Wert
+    """
+
     pass
 
 
@@ -203,6 +245,11 @@ def pdf_export(new_list):
 # oder ein False returnen. Wird über die export Funktionen geprüft (if aktiv_checkbox() is True ..)
 
 def aktiv_checkbox():
+    """Funktion prüft die Checkbox "nur aktive Tankstellen anzeigen"
+    Returns:
+        Boolean
+    """
+
     if check_var.get() == 1:
         return True
     else:
@@ -212,19 +259,34 @@ def aktiv_checkbox():
 # 3.1.9 Sound - Funktionen
 
 def info_sound():
+    """Funktion für den Infosound
+    Returns:
+        kein Wert
+    """
+
     info = pygame.mixer.Sound(r".\sounds\Control.mp3")
     info.play()
-
+    return
 
 def error_sound():
+    """Funktion für den Errorsound
+    Returns:
+        kein Wert
+    """
+
     error = pygame.mixer.Sound(r".\sounds\Windows.mp3")
     error.play()
-
+    return
 
 # 3.2.0 Funktionen für den Prognose und Historie - Tab
 # 3.2.1 Funktion für den Los-Button
 
 def los2_button():
+    """Funktion für den Losbutton im zweiten Tab für Historie und Prognose
+    Returns:
+        folgt
+    """
+
     pass
 
 
