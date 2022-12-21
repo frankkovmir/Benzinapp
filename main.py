@@ -288,7 +288,7 @@ def los2_button():
     """
 
     pass
-
+#
 
 """
 Part 1 - Erstellen des GUI und der benötigten Buttons / Tabs (Frank Kovmir)
