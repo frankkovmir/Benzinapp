@@ -7,6 +7,7 @@
 
 import tkinter as tki
 from tkinter import ttk
+from tkinter.filedialog import askdirectory
 from PIL import ImageTk, Image
 from tkinter import messagebox
 import numpy as np
@@ -19,6 +20,9 @@ import pgeocode
 import string
 import requests
 import json
+import pandas as pd
+from datetime import datetime
+import os
 
 #frankchange
 
@@ -91,9 +95,9 @@ def popup(data):
     info_sound()
     response = tki.messagebox.askyesno("Bitte bestätigen", "Sind Sie mit der Auswahl einverstanden?")
     tki.Label(tab1, text=response)
-    print(data)
-    print(data['lat'])  # Testaufruf um Übergabe der PLZ zu testen
-    print(data['lon'])
+    # print(data)
+    # print(data['lat'])  # Testaufruf um Übergabe der PLZ zu testen
+    # print(data['lon'])
     if response == 1:
         api_check(data)
     else:
@@ -136,7 +140,7 @@ def api_check(data):
         info_sound()
         return tki.messagebox.showinfo("Fehler in der Verbindung", api.get("message"))
 
-    print(api)
+    # print(api)
 
     for i in api.get("stations"):
         if active_flag:
@@ -147,8 +151,8 @@ def api_check(data):
         else:
             full_list.append(i)
 
-    #print(open_list)
-    #print(full_list)
+    # print(open_list)
+    # print(full_list)
 
     new_list = []
     if len(open_list) <= 0:
@@ -190,7 +194,23 @@ def map_export(new_list):
 # 3.1.7 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
 
 def cvs_export(new_list):
-    pass
+    """Erstellt eine Tabelle aus den Daten, die durch die API angefragt werden und speichert diese als csv.
+
+    Args:
+        new_list (list): Liste mit multiplen dicts. Je Zeile ein dict.
+    """
+    # erstellt dataframe aus den dicts
+    df = pd.DataFrame(new_list)
+    # jeder Export erhält einen datetime Stempel
+    export_time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    # öffnet Datei Explorer damit man den Pfad aussuchen kann, wo die csv gespeichert werden soll
+    dir_name = askdirectory()
+    # Dateinamen mit Zeitstempel erstellen und Pfad zusammenfügen
+    file_name = f'csv_export_{export_time}.csv'
+    file_path = os.path.join(dir_name, file_name)
+    # Dataframe als csv exportieren
+    df.to_csv(file_path, index = False, encoding='utf-8')
+    return tki.messagebox.showinfo('CSV-Export', 'CSV erfolgreich generiert.')
 
 
 # 3.1.8 Funktion für die Generierung des pdf Exports, falls angeklickt im radio-button
