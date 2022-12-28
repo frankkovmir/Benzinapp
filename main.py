@@ -19,6 +19,7 @@ import pgeocode
 import string
 import requests
 import json
+from fpdf import FPDF
 
 #frankchange
 
@@ -238,7 +239,13 @@ def pdf_export(new_list):
         kein Return-Wert
     """
 
-    pass
+    pdf=FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial",size=12)
+    for i in new_list:
+        pdf.write(5,str(i))
+        pdf.ln() #Einfügen von Zeilenumbrueche
+    pdf.output("./output/ergebnislist.pdf")
 
 
 # 3.1.9 Funktion, um nur aktive Tankstellen anzuzeigen. Soll je nach Checkbox Status ein True (checked)
