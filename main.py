@@ -23,6 +23,7 @@ import json
 import pandas as pd
 from datetime import datetime
 import os
+import subprocess
 
 #frankchange
 
@@ -193,7 +194,7 @@ def map_export(new_list):
 
 # 3.1.7 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
 
-def cvs_export(new_list):
+def cvs_export(new_list: list):
     """Erstellt eine Tabelle aus den Daten, die durch die API angefragt werden und speichert diese als csv.
 
     Args:
