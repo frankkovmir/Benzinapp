@@ -1,4 +1,5 @@
 historical_data/test_notebook.ipynb
 historical_data/dashboard_test.ipynb
-historical_data/tankerkoenig-data
+historical_data/tankerkoenig-data/prices
+historical_data/tankerkoenig-data/stations
 __pycache__
