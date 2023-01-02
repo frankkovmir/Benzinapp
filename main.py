@@ -240,8 +240,11 @@ def pdf_export(new_list):
     # vielleicht noch eine Überschrift
     # lange Einträge müssten gecuttet werden
 
+    # Erstelle ein leeres Tuple für Concatenation
     TABLE_DATA = ()
+    # Estelle eine Interims Liste mit Tuples aus der übergebenen new_list, die Zahlen (PLZ, Preis) müssen Strings sein
     interim = [(d['name'], d['street'], str(d['postCode']), str(d['price'])) for d in new_list]
+    # Erstelle einen Tuple of Tuples für die render Funktion
     for entry in interim:
         TABLE_DATA+=(entry,)
     TABLE_COL_NAMES = ("Tankstelle", "Straße", "PLZ", "Preis")
