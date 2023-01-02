@@ -238,7 +238,8 @@ def pdf_export(new_list):
         kein Return-Wert
     """
     # vielleicht noch eine Überschrift
-    # lange Einträge müssten gecuttet werden
+    # lange Einträge müssten gecuttet werden, damit das Format schön bleibt
+    # Explorer fürs Speichern
 
     # Erstelle ein leeres Tuple für Concatenation
     TABLE_DATA = ()
@@ -253,6 +254,8 @@ def pdf_export(new_list):
     pdf.set_font("Times", size=10)
     line_height = pdf.font_size * 2.5
     col_width = pdf.epw / 4  # distribute content evenly
+
+    # siehe https://pyfpdf.github.io/fpdf2/Tables.html (repeat table header on each page)
 
     def render_table_header():
         pdf.set_font(style="B")  # enabling bold text
