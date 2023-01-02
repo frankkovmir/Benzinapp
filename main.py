@@ -270,6 +270,8 @@ def pdf_export(new_list):
         if pdf.will_page_break(line_height):
             render_table_header()
         for column in row:
+            # fixes UnicodeEncodeError if character is not latin1
+            column = column.encode('latin-1', 'replace').decode('latin-1')
             pdf.cell(col_width, line_height, column, border=1)
         pdf.ln(line_height)
     pdf.output("Tankstellen_in_deiner_Naehe.pdf")  # hier könnte dynamisch das aktuelle Datum eingetragen werden
