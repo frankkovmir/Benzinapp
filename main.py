@@ -19,8 +19,7 @@ import pgeocode
 import string
 import requests
 import json
-
-#frankchange
+from fpdf import FPDF
 
 """
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
@@ -84,12 +83,13 @@ def los_button():
 
             else:
                 error_sound()
-                return tki.messagebox.showerror("Falscher Input", f"Die eingegebene Adresse '{adresse.get()}' ist keine "
-                                                           f"Postleitzahl in Deutschland")
+                return tki.messagebox.showerror("Falscher Input",
+                                                f"Die eingegebene Adresse '{adresse.get()}' ist keine "
+                                                f"Postleitzahl in Deutschland")
         else:
             error_sound()
             return tki.messagebox.showerror("Falscher Input", f"Die eingegebene Adresse '{adresse.get()}' ist keine "
-                                                       f"Postleitzahl")
+                                                              f"Postleitzahl")
     else:
         info_sound()
         return tki.messagebox.showinfo("Fehlender Input", "Bitte eine Postleitzahl angeben!")
@@ -117,6 +117,7 @@ def popup(data):
         tki.Label(tab1, text=response)
         return
 
+
 # 3.1.4 Funktion für den Einstieg in die Generierungsfunktionen, baut API Verbindung auf
 
 def api_check(data):
@@ -137,7 +138,7 @@ def api_check(data):
     # Code für radius von https://stackoverflow.com/questions/1450897/remove-characters-except-digits-from-string
     # -using-python. Es wandelt den Radius-Input (zB 5km) in ein Float Objekt für den Api Aufruf um, siehe Doku
     radius = float(''.join(filter(str.isdigit, r.get())))
-    kraftstoff_dict = {'Diesel': 'diesel', 'Super': 'e5', 'Super E10': 'e10'} # wandelt den Kraftstoff-Input (Diesel)
+    kraftstoff_dict = {'Diesel': 'diesel', 'Super': 'e5', 'Super E10': 'e10'}  # wandelt den Kraftstoff-Input (Diesel)
     # in den vom Api unterstützen String um
     kraftstoff = kraftstoff_dict[ks.get()]
     active_flag = aktiv_checkbox()
@@ -169,7 +170,6 @@ def api_check(data):
         new_list = full_list
     else:
         new_list = open_list
-
 
     # Einstieg in die weiteren Funktionen, hier muss noch dafür gesorgt werden, dass in Abhängigkeit vom active Flag
     # die korrekte Liste in die Funktionen übergeben wird (open, oder full)
@@ -237,8 +237,36 @@ def pdf_export(new_list):
     Returns:
         kein Return-Wert
     """
+    # vielleicht noch eine Überschrift
+    # lange Einträge müssten gecuttet werden
 
-    pass
+    TABLE_DATA = ()
+    interim = [(d['name'], d['street'], str(d['postCode']), str(d['price'])) for d in new_list]
+    for entry in interim:
+        TABLE_DATA+=(entry,)
+    TABLE_COL_NAMES = ("Tankstelle", "Straße", "PLZ", "Preis")
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Times", size=10)
+    line_height = pdf.font_size * 2.5
+    col_width = pdf.epw / 4  # distribute content evenly
+
+    def render_table_header():
+        pdf.set_font(style="B")  # enabling bold text
+        for col_name in TABLE_COL_NAMES:
+            pdf.cell(col_width, line_height, col_name, border=1)
+        pdf.ln(line_height)
+        pdf.set_font(style="")  # disabling bold text
+
+    render_table_header()
+
+    for row in TABLE_DATA:
+        if pdf.will_page_break(line_height):
+            render_table_header()
+        for column in row:
+            pdf.cell(col_width, line_height, column, border=1)
+        pdf.ln(line_height)
+    pdf.output("Tankstellen_in_deiner_Naehe.pdf")  # hier könnte dynamisch das aktuelle Datum eingetragen werden
 
 
 # 3.1.9 Funktion, um nur aktive Tankstellen anzuzeigen. Soll je nach Checkbox Status ein True (checked)
@@ -268,6 +296,7 @@ def info_sound():
     info.play()
     return
 
+
 def error_sound():
     """Funktion für den Errorsound
     Returns:
@@ -277,6 +306,7 @@ def error_sound():
     error = pygame.mixer.Sound(r".\sounds\Windows.mp3")
     error.play()
     return
+
 
 # 3.2.0 Funktionen für den Prognose und Historie - Tab
 # 3.2.1 Funktion für den Los-Button
@@ -288,6 +318,8 @@ def los2_button():
     """
 
     pass
+
+
 #
 
 """
@@ -410,10 +442,10 @@ los2 = tki.Button(tab2, text="Los", padx=80, pady=60, \
 ende2 = tki.Button(tab2, text='Beenden', padx=60, pady=60, command=ende_button)
 
 # 1.3.2 Dropdown für Historie (1 W, 1M, 1J)
-#folgt
+# folgt
 
 # 1.3.3 Radiobuttons für Preisprognose (Diesel, Super, Super E10) des nächsten Tages
-#folgt
+# folgt
 
 # Outputs für Historie jeweils als Grafik in neuem Fenster
 # Outputs für Prognose jeweils als Textfeld Hinweis
