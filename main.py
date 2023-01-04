@@ -24,7 +24,8 @@ import os
 import subprocess
 from tkinter.filedialog import askdirectory
 from pathlib import Path
-import webview
+import webbrowser
+
 """
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
 """
@@ -352,20 +353,15 @@ def historie():
         öffnet das Dashboard für die historischen Daten
     """
 
-    # code für window siehe https://www.geeksforgeeks.org/how-to-open-a-website-in-a-tkinter-window/
+    # code für browser siehe https://docs.python.org/2/library/webbrowser.html#webbrowser.open
     # code für subprocess zum Teil siehe https://stackoverflow.com/questions/3781851/run-a-python-script-fro
     # m-another-python-script-passing-in-arguments
 
     path = Path().absolute()
     command_dir = f'{path}\historical_data\dashboard\main.py'
     subprocess.call(['python',f'{command_dir}'])
-    try:
-        # Achtung: hier haben wir ein Problem, wenn der Port 8050 belegt ist
-        webview.create_window('Dashboard', 'http://127.0.0.1:8050')
-    except OSError as e:
-        return tki.messagebox.showinfo("Es gibt ein Problem beim Standardport 8050 - bitte öffnen", e)
 
-    return webview.start()
+    return webbrowser.open_new('http://127.0.0.1:8050')
 
 def prognose():
     """Funktion für die Prognose des Preises des nächsten Tages, für alle Kraftstoffe
