@@ -359,7 +359,12 @@ def historie():
     path = Path().absolute()
     command_dir = f'{path}\historical_data\dashboard\main.py'
     subprocess.call(['python',f'{command_dir}'])
-    webview.create_window('Dashboard', 'http://127.0.0.1:8050')
+    try:
+        # Achtung: hier haben wir ein Problem, wenn der Port 8050 belegt ist
+        webview.create_window('Dashboard', 'http://127.0.0.1:8050')
+    except OSError as e:
+        return tki.messagebox.showinfo("Es gibt ein Problem beim Standardport 8050 - bitte öffnen", e)
+
     return webview.start()
 
 def prognose():
