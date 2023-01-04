@@ -4,7 +4,7 @@
 # Pygame Dokumentation für Sounds: https://www.pygame.org/docs/ref/mixer.html
 
 # Import der benötigten Libraries
-
+import sys
 import tkinter as tki
 from tkinter import ttk
 from PIL import ImageTk, Image
@@ -25,6 +25,8 @@ import subprocess
 from tkinter.filedialog import askdirectory
 from pathlib import Path
 import webbrowser
+
+
 
 """
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
@@ -343,6 +345,7 @@ def los2_button():
         info_sound()
         return tki.messagebox.showinfo("Fehlender Input", "Bitte eine Auswahl treffen!")
     elif hp and hp.get() == 'Historie':
+        pygame.mixer.pause()
         return historie()
     elif hp and hp.get() == 'Prognose des nächsten Tages':
         return prognose()
@@ -353,15 +356,11 @@ def historie():
         öffnet das Dashboard für die historischen Daten
     """
 
-    # code für browser siehe https://docs.python.org/2/library/webbrowser.html#webbrowser.open
-    # code für subprocess zum Teil siehe https://stackoverflow.com/questions/3781851/run-a-python-script-fro
-    # m-another-python-script-passing-in-arguments
+    #return subprocess.run([sys.executable, mp.test()],stdout=subprocess.PIPE, stderr =subprocess.STDOUT)
+    webbrowser.open_new('http://127.0.0.1:8050')
+    pygame.mixer.pause()
+    root.destroy()
 
-    path = Path().absolute()
-    command_dir = f'{path}\historical_data\dashboard\main.py'
-    subprocess.call(['python',f'{command_dir}'])
-
-    return webbrowser.open_new('http://127.0.0.1:8050')
 
 def prognose():
     """Funktion für die Prognose des Preises des nächsten Tages, für alle Kraftstoffe
@@ -376,12 +375,14 @@ Das Erstellen dieser Objekte mit Tkinter ist ein zweistufiger Prozess - erst wir
 (alles in Tkinter ist ein Widget) und dann in das Fenster (d.h. in den root) geplottet.
 """
 
-# 1.1 Initiieren der Standardbefehle
+# 1.1 Initiieren der Startbefehle
 
 root = tki.Tk()  # erstellt das Root-Fenster für alle weiteren Widgets (d.h. Buttons etc)
 root.title("PKI - Fuel Guru")  # bennent das Fenster
 root.geometry("550x620")  # setzt die Maße, Breite x Höhe
 root.iconbitmap('./icon/gasstation_4334.ico')  # Iconanpassung
+path = Path().absolute() # greift das aktuelle Arbeitsverzeichnis ab
+command_dir = f'{path}\historical_data\dashboard\main.py' # setzt den Pfad für das Historische Daten Dashboard
 
 # Setzen der derzeitigen User-Postleitzahl im Adressfeld(näherungsweise)
 # Code von https://stackoverflow.com/questions/24906833/how-to-access-current-location-of-any-user-using-python
@@ -528,5 +529,9 @@ los2.place(x=340, y=430)
 ende2.place(x=20, y=430)
 
 # 1.6 Mainloop
-
 root.mainloop()  # führt eine Endlosschleife durch (startet das sichtbare GUI-Fenster)
+pygame.mixer.music.stop()
+try:
+    process = subprocess.run(['python',f'{command_dir}'])
+except:
+    pass
