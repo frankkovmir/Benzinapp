@@ -20,6 +20,12 @@ import string
 import requests
 import json
 from fpdf import FPDF
+import pandas as pd
+from datetime import datetime
+import os
+import subprocess
+
+#frankchange
 
 """
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
@@ -39,7 +45,7 @@ def ende_button():
     end_sound.play()
     response = tki.messagebox.showinfo("Goodbye", "Auf Wiedersehen!")
     tki.Label(tab1, text=response)
-    return root.quit()
+    root.quit()
 
 
 # 3.1.2 Funktion für den Klick auf "Los". Erst werden Validierungen der Felder durchlaufen, danach Übergang in 3.2
@@ -171,6 +177,7 @@ def api_check(data):
     else:
         new_list = open_list
 
+
     # Einstieg in die weiteren Funktionen, hier muss noch dafür gesorgt werden, dass in Abhängigkeit vom active Flag
     # die korrekte Liste in die Funktionen übergeben wird (open, oder full)
 
@@ -217,15 +224,24 @@ def map_export(new_list):
 
 # 3.1.7 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
 
-def cvs_export(new_list):
-    """Funktion für die Ergebnisausgabe im CVS-Format
-    Input:
-        Liste aus der api_check Funktion
-    Returns:
-        kein Return-Wert
-    """
+def cvs_export(new_list: list):
+    """Erstellt eine Tabelle aus den Daten, die durch die API angefragt werden und speichert diese als csv.
 
-    pass
+    Args:
+        new_list (list): Liste mit multiplen dicts. Je Zeile ein dict.
+    """
+    # erstellt dataframe aus den dicts
+    df = pd.DataFrame(new_list)
+    # jeder Export erhält einen datetime Stempel
+    export_time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    # öffnet Datei Explorer damit man den Pfad aussuchen kann, wo die csv gespeichert werden soll
+    dir_name = askdirectory()
+    # Dateinamen mit Zeitstempel erstellen und Pfad zusammenfügen
+    file_name = f'csv_export_{export_time}.csv'
+    file_path = os.path.join(dir_name, file_name)
+    # Dataframe als csv exportieren
+    df.to_csv(file_path, index = False, encoding='utf-8')
+    return tki.messagebox.showinfo('CSV-Export', 'CSV erfolgreich generiert.')
 
 
 # 3.1.8 Funktion für die Generierung des pdf Exports, falls angeklickt im radio-button
@@ -453,7 +469,7 @@ ende2 = tki.Button(tab2, text='Beenden', padx=60, pady=60, command=ende_button)
 # folgt
 
 # 1.3.3 Radiobuttons für Preisprognose (Diesel, Super, Super E10) des nächsten Tages
-# folgt
+#folgt
 
 # Outputs für Historie jeweils als Grafik in neuem Fenster
 # Outputs für Prognose jeweils als Textfeld Hinweis
