@@ -10,9 +10,7 @@ from tkinter import ttk
 from PIL import ImageTk, Image
 from tkinter import messagebox
 import numpy as np
-import matplotlib.pyplot as plt
 import pygame
-import time  # ggf. notwendig für api unterbrechung bei spam-requests
 import geocoder
 import geopy
 import pgeocode
@@ -24,13 +22,12 @@ import pandas as pd
 from datetime import datetime
 import os
 import subprocess
-
-#frankchange
-
+from tkinter.filedialog import askdirectory
+from pathlib import Path
+import webview
 """
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
 """
-
 
 # 3.1.0 Funktionen für den Haupttab
 # 3.1.1 Funktion für den Beenden-Button
@@ -338,13 +335,39 @@ def error_sound():
 def los2_button():
     """Funktion für den Losbutton im zweiten Tab für Historie und Prognose
     Returns:
-        folgt
+        Einstieg in Prognose oder Historie Funktion
     """
 
+    if hp and hp.get() == "Auswahl treffen":
+        info_sound()
+        return tki.messagebox.showinfo("Fehlender Input", "Bitte eine Auswahl treffen!")
+    elif hp and hp.get() == 'Historie':
+        return historie()
+    elif hp and hp.get() == 'Prognose des nächsten Tages':
+        return prognose()
+
+def historie():
+    """Funktion für die Historie
+    Returns:
+        öffnet das Dashboard für die historischen Daten
+    """
+
+    # code für window siehe https://www.geeksforgeeks.org/how-to-open-a-website-in-a-tkinter-window/
+    # code für subprocess zum Teil siehe https://stackoverflow.com/questions/3781851/run-a-python-script-fro
+    # m-another-python-script-passing-in-arguments
+
+    path = Path().absolute()
+    command_dir = f'{path}\historical_data\dashboard\main.py'
+    subprocess.call(['python',f'{command_dir}'])
+    webview.create_window('Dashboard', 'http://127.0.0.1:8050')
+    return webview.start()
+
+def prognose():
+    """Funktion für die Prognose des Preises des nächsten Tages, für alle Kraftstoffe
+    Returns:
+        zeigt die Prognose in einem Popup
+    """
     pass
-
-
-#
 
 """
 Part 1 - Erstellen des GUI und der benötigten Buttons / Tabs (Frank Kovmir)
@@ -465,8 +488,18 @@ los2 = tki.Button(tab2, text="Los", padx=80, pady=60, \
                   command=los2_button)  # Achtung, Funktion fehlt noch
 ende2 = tki.Button(tab2, text='Beenden', padx=60, pady=60, command=ende_button)
 
-# 1.3.2 Dropdown für Historie (1 W, 1M, 1J)
-# folgt
+# 1.3.2 Dropdown für Historie
+
+auswahl_liste = [
+
+    "Historie",
+    "Prognose des nächsten Tages"
+]
+
+hp = tki.StringVar()
+hp.set("Auswahl treffen")
+auswahl = tki.OptionMenu(tab2, hp, *auswahl_liste)
+auswahl.config(width = 77, height = 5)
 
 # 1.3.3 Radiobuttons für Preisprognose (Diesel, Super, Super E10) des nächsten Tages
 #folgt
@@ -489,7 +522,7 @@ ende.place(x=20, y=430)
 aktiv.place(x=20, y=80)
 
 # 1.5 Plotten der Historie und Prognose - Buttons in das Tab 2 des GUI - Fensters
-
+auswahl.place(x=20, y=50)
 los2.place(x=340, y=430)
 ende2.place(x=20, y=430)
 
