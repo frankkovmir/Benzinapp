@@ -9,7 +9,7 @@ In beiden Fällen ist es notwendig, dass sich der Icon-, der Sound-, und der his
 
 # Ausführen per Terminal
 
-  1.) Start des Terminals aus dem Download-Ordner des entpackten Archivs (cmd im Pfad des Fensters eingeben), oder Navigation per cd
+  1.) Start des Terminals aus dem Download-Ordner des entpackten Archivs (cmd im Pfad des Fensters eingeben), oder Navigation in der Shell zu dem Ordner per cd
   
 ![grafik](https://user-images.githubusercontent.com/114833933/210898763-18ee6d49-f694-4f78-bd5a-357f041bf93b.png)
 
