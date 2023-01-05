@@ -25,7 +25,7 @@ import subprocess
 from tkinter.filedialog import askdirectory
 from pathlib import Path
 import webbrowser
-
+from threading import Thread
 
 
 """
@@ -346,21 +346,28 @@ def los2_button():
         return tki.messagebox.showinfo("Fehlender Input", "Bitte eine Auswahl treffen!")
     elif hp and hp.get() == 'Historie':
         pygame.mixer.pause()
-        return historie()
+        return historie_threaded()
     elif hp and hp.get() == 'Prognose des nächsten Tages':
         return prognose()
+
+def historie_threaded():
+    Thread(target=historie).start()
 
 def historie():
     """Funktion für die Historie
     Returns:
         öffnet das Dashboard für die historischen Daten
     """
-
-    #return subprocess.run([sys.executable, mp.test()],stdout=subprocess.PIPE, stderr =subprocess.STDOUT)
+    tki.messagebox.showinfo("Achtung", "Dies startet ein vom GUI getrenntes Python-Skript. Zum Beenden der Verbindung zum Dashboard "
+                                       "muss das Terminal geschlossen werden. Das Schließen des GUI reicht nicht aus!")
+    path = Path().absolute()
+    command_dir = f'{path}\historical_data\dashboard\main.py'
     webbrowser.open_new('http://127.0.0.1:8050')
-    pygame.mixer.pause()
-    root.destroy()
-
+    DETACHED_PROCESS = 0x00000008
+    CREATE_NEW_PROCESS_GROUP = 0x00000200
+    subprocess.Popen(['python', f'{command_dir}'], shell=True,
+                creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP)
+    return
 
 def prognose():
     """Funktion für die Prognose des Preises des nächsten Tages, für alle Kraftstoffe
@@ -530,8 +537,3 @@ ende2.place(x=20, y=430)
 
 # 1.6 Mainloop
 root.mainloop()  # führt eine Endlosschleife durch (startet das sichtbare GUI-Fenster)
-pygame.mixer.music.stop()
-try:
-    process = subprocess.run(['python',f'{command_dir}'])
-except:
-    pass

@@ -6,36 +6,26 @@ from dash_bootstrap_components.themes import BOOTSTRAP
 from pathlib import Path
 import sys
 import os
+from historical_data.dashboard.components.layout import create_layout
+from historical_data.dashboard.data.loader import load_data
+import webbrowser
 import multiprocessing
 import time
 
 
 sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'components')))
 sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')))
-from layout import create_layout
-from loader import load_data
 
-DATA_PATH = Path(__file__).parents[1] / 'historical_data.csv'
 
-def test():
-
+path = Path().absolute()
+DATA_PATH = f'{path}\historical_data\historical_data.csv'
+# def start_dashboard():
+try:
     data = load_data(DATA_PATH)
     app = Dash(external_stylesheets=[BOOTSTRAP])
     app.title = 'Historische Daten Dashboard'
     app.layout = create_layout(app, data)
     app.run()
-
-
-if __name__ == "__main__":
-    try:
-        p = multiprocessing.Process(target=test, name="test")
-        p.start()
-        time.sleep(600000)
-
-        # Terminate foo
-        p.terminate()
-
-        # Cleanup
-        p.join()
-    except:
-        p.terminate()
+    webbrowser.open_new('http://127.0.0.1:8050')
+except Exception as e:
+    print(e)
