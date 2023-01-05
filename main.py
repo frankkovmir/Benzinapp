@@ -27,25 +27,33 @@ from pathlib import Path
 import webbrowser
 from threading import Thread
 
-
 """
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
 """
 
 # 3.1.0 Funktionen für den Haupttab
-# 3.1.1 Funktion für den Beenden-Button
+# 3.1.1 Funktion für den Beenden-Button bzw. das Beenden per Window - Manager
+
+def on_closing():
+    """Implementiert die Funktion für das Beenden per Window Manager
+    Returns:
+        Zerstört den Root
+    """
+
+    end_sound()
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        root.destroy()
 
 def ende_button():
     """Implementiert die Funktion für den Beenden-Button
     Returns:
-        Beendet die root loop Funktion
+        Zerstört den Root
     """
 
-    end_sound = pygame.mixer.Sound(r".\sounds\Shutdown.mp3")
-    end_sound.play()
+    end_sound()
     response = tki.messagebox.showinfo("Goodbye", "Auf Wiedersehen!")
     tki.Label(tab1, text=response)
-    root.quit()
+    root.destroy()
 
 
 # 3.1.2 Funktion für den Klick auf "Los". Erst werden Validierungen der Felder durchlaufen, danach Übergang in 3.2
@@ -331,6 +339,15 @@ def error_sound():
     error.play()
     return
 
+def end_sound():
+    """Funktion für den Beendensound
+    Returns:
+        kein Wert
+    """
+
+    end_sound = pygame.mixer.Sound(r".\sounds\Shutdown.mp3")
+    end_sound.play()
+    return
 
 # 3.2.0 Funktionen für den Prognose und Historie - Tab
 # 3.2.1 Funktion für den Los-Button
@@ -345,29 +362,38 @@ def los2_button():
         info_sound()
         return tki.messagebox.showinfo("Fehlender Input", "Bitte eine Auswahl treffen!")
     elif hp and hp.get() == 'Historie':
-        pygame.mixer.pause()
+        info_sound()
         return historie_threaded()
     elif hp and hp.get() == 'Prognose des nächsten Tages':
+        info_sound()
         return prognose()
 
 def historie_threaded():
-    Thread(target=historie).start()
+    """Funktion zum Aufruf der Funktion History() in einem eigenen Thread, um nicht den mainloop einzufrieren
+        Returns:
+            s.o.
+    """
+    return Thread(target=historie).start()
 
 def historie():
-    """Funktion für die Historie
-    Returns:
-        öffnet das Dashboard für die historischen Daten
+    """Funktion für die Historie, öffnet das Dashboard für die historischen Daten. Subprocess ist notwendig,
+    damit der Kind-Prozess (das Dashboard) unabhängig vom Hauptprozess (GUI) laufen kann
+        Returns: Startet die Dashboard Funktion
     """
+    # subprocess code in anlehnung an https://stackoverflow.com/questions/14797236/python-howto-launch-a-full-process
+    # -not-a-chil d-process-and-retrieve-the-pid
+    # browser doc. https://docs.python.org/3/library/webbrowser.html
+
     tki.messagebox.showinfo("Achtung", "Dies startet ein vom GUI getrenntes Python-Skript. Zum Beenden der Verbindung zum Dashboard "
                                        "muss das Terminal geschlossen werden. Das Schließen des GUI reicht nicht aus!")
     path = Path().absolute()
     command_dir = f'{path}\historical_data\dashboard\main.py'
-    webbrowser.open_new('http://127.0.0.1:8050')
+    webbrowser.open('http://127.0.0.1:8050', new=1,autoraise=True)
     DETACHED_PROCESS = 0x00000008
     CREATE_NEW_PROCESS_GROUP = 0x00000200
-    subprocess.Popen(['python', f'{command_dir}'], shell=True,
+    ps = subprocess.Popen(['python', f'{command_dir}'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP)
-    return
+    return ps.communicate()
 
 def prognose():
     """Funktion für die Prognose des Preises des nächsten Tages, für alle Kraftstoffe
@@ -536,4 +562,7 @@ los2.place(x=340, y=430)
 ende2.place(x=20, y=430)
 
 # 1.6 Mainloop
+root.protocol("WM_DELETE_WINDOW", on_closing)
 root.mainloop()  # führt eine Endlosschleife durch (startet das sichtbare GUI-Fenster)
+
+
