@@ -4,17 +4,14 @@ Quelle: https://www.youtube.com/watch?v=XOFrvzWFM7Y&t=438s&ab_channel=ArjanCodes
 from dash import Dash, html
 from dash_bootstrap_components.themes import BOOTSTRAP
 from pathlib import Path
+import webbrowser
 import sys
 import os
-from historical_data.dashboard.components.layout import create_layout
-from historical_data.dashboard.data.loader import load_data
-import webbrowser
-import multiprocessing
-import time
-
-
 sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'components')))
 sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')))
+from layout import create_layout
+from loader import load_data
+
 
 
 path = Path().absolute()
