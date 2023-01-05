@@ -9,14 +9,27 @@ In beiden Fällen ist es notwendig, dass sich der Icon-, der Sound-, und der his
 
 # Ausführen per Terminal
 
-  1.) Start des Terminals aus dem Download-Ordner des entpackten Archivs (cmd im Pfad des Fensters eingeben), oder Navigation in der Shell zu dem Ordner per cd
+1.) Archiv in einen Ordner am gewünschten Ort entpacken
+
+![grafik](https://user-images.githubusercontent.com/114833933/210900512-57357386-4a54-43f0-8600-5b5787a622d5.png)
+
+  2.) Start des Terminals aus dem Hauptordner des entpackten Archivs (cmd im Pfad des Fensters eingeben), oder Navigation in der Shell zu dem Ordner per cd
   
 ![grafik](https://user-images.githubusercontent.com/114833933/210898763-18ee6d49-f694-4f78-bd5a-357f041bf93b.png)
 
 
-2.) Ausführen des Befehls python main.py
+3.) Ausführen des Befehls python main.py
 
 ![grafik](https://user-images.githubusercontent.com/114833933/210898866-850e875c-3b5a-4988-a616-73f1e6f24414.png)
+
+# Ausführen per IDE (am Beispiel Pycharm)
+
+
+  1.) Archiv entpacken
+  
+![grafik](https://user-images.githubusercontent.com/114833933/210900512-57357386-4a54-43f0-8600-5b5787a622d5.png)
+
+2.) File -> Open -> Navigation zum Ordner und Öffnen
 
 
 # Troubleshoot
