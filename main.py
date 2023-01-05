@@ -4,7 +4,7 @@
 # Pygame Dokumentation für Sounds: https://www.pygame.org/docs/ref/mixer.html
 
 # Import der benötigten Libraries
-import sys
+
 import tkinter as tki
 from tkinter import ttk
 from PIL import ImageTk, Image
@@ -41,7 +41,7 @@ def on_closing():
     """
 
     end_sound()
-    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+    if messagebox.askokcancel("Beenden", "Wollen Sie das Programm beenden?"):
         root.destroy()
 
 def ende_button():
@@ -51,9 +51,8 @@ def ende_button():
     """
 
     end_sound()
-    response = tki.messagebox.showinfo("Goodbye", "Auf Wiedersehen!")
-    tki.Label(tab1, text=response)
-    root.destroy()
+    if messagebox.askokcancel("Beenden", "Wollen Sie das Programm beenden?"):
+        root.destroy()
 
 
 # 3.1.2 Funktion für den Klick auf "Los". Erst werden Validierungen der Felder durchlaufen, danach Übergang in 3.2
