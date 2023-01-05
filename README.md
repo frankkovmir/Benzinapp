@@ -33,9 +33,9 @@ Die Installation sollte wie folgt erfolgen:
 
   1.) Aufruf https://www.lfd.uci.edu/~gohlke/pythonlibs/
 
-![grafik](https://user-images.githubusercontent.com/114833933/210898649-ac85cb73-1968-44ff-8a67-8ff14a8b07f3.png)
-
 2.) STRG+F und Suche nach "Pygame" (ohne Anführungsstriche)
+
+![grafik](https://user-images.githubusercontent.com/114833933/210898649-ac85cb73-1968-44ff-8a67-8ff14a8b07f3.png)
 
 3.) Ausführen des Terminals (CMD)
 
