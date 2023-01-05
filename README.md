@@ -31,6 +31,14 @@ In beiden Fällen ist es notwendig, dass sich der Icon-, der Sound-, und der his
 
 2.) File -> Open -> Navigation zum Ordner und Öffnen
 
+# Ausführen per Anwendung (.exe)
+
+  1.) Archiv entpacken
+
+2.) Die FuelGuru Anwendung per Doppelklick, oder Rechtsklick -> Ausführen starten
+
+![grafik](https://user-images.githubusercontent.com/114833933/210901242-2117d1b2-cf99-46f8-bd47-2839cc0f339d.png)
+  
 
 # Troubleshoot
 
@@ -39,7 +47,11 @@ Sollten bei dem Aufruf der main.py importierte Module fehlen, so sind diese per 
 
 ![grafik](https://user-images.githubusercontent.com/114833933/210899951-b74d4360-1dee-463e-b6f9-506df495473d.png)
 
-Teilweise kommt es Problemen bei dem Pygame Modul in Kombination mit AnaConda (o.ä.) aufgrund von einer fehlenden .dll Datei (libmpg123-0.dll). Diese sollten nur entstehen, wenn die main.py per IDE oder Terminal gestartet wird, nicht jedoch bei der .exe Datei.
+Sollten bei dem Start der Anwendung (.exe) Fehler entstehen, dann befindet sich die .exe vermutlich nicht im Hauptordner zusammen mit den Abhängigkeiten "icon", "sounds" und "historical_data"
+
+![grafik](https://user-images.githubusercontent.com/114833933/210901385-532ac98a-bffd-410a-a063-93a0af3fc61a.png)
+
+Teilweise kommt es zu Problemen bei dem für Sounds genutzten Pygame Modul in Kombination mit AnaConda (o.ä. Environments) aufgrund von einer fehlenden .dll Datei (libmpg123-0.dll). Diese sollten nur entstehen, wenn die main.py per IDE oder Terminal gestartet wird, nicht jedoch bei der .exe Datei.
 Ein möglicher Workaround ist der manuelle Download einer passenden .whl (wheel) Datei. 
 
 Die Installation sollte wie folgt erfolgen:
