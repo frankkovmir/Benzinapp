@@ -315,7 +315,7 @@ def aktiv_checkbox():
         return False
 
 
-# 3.1.9 Sound - Funktionen
+# 3.1.9.1 Sound - Funktionen
 
 def info_sound():
     """Funktion für den Infosound
@@ -348,6 +348,21 @@ def end_sound():
     end_sound.play()
     return
 
+def music_control():
+    """Funktion für den Start/das Ende der Hintergrundmusik
+    Returns:
+        kein Wert
+    """
+    global SOUNDCHECK
+    print(SOUNDCHECK)
+    if SOUNDCHECK is True:
+        SOUNDCHECK = False
+        print(SOUNDCHECK)
+        return pygame.mixer.music.stop()
+    else:
+        SOUNDCHECK = True
+        return pygame.mixer.music.play(loops=-1)
+
 # 3.2.0 Funktionen für den Prognose und Historie - Tab
 # 3.2.1 Funktion für den Los-Button
 
@@ -369,16 +384,18 @@ def los2_button():
 
 def historie_threaded():
     """Funktion zum Aufruf der Funktion History() in einem eigenen Thread, um nicht den mainloop einzufrieren
-        Returns:
+    Returns:
             s.o.
     """
+
     return Thread(target=historie).start()
 
 def historie():
     """Funktion für die Historie, öffnet das Dashboard für die historischen Daten. Subprocess ist notwendig,
     damit der Kind-Prozess (das Dashboard) unabhängig vom Hauptprozess (GUI) laufen kann
-        Returns: Startet die Dashboard Funktion
+    Returns: Startet die Dashboard Funktion
     """
+
     # subprocess code in anlehnung an https://stackoverflow.com/questions/14797236/python-howto-launch-a-full-process
     # -not-a-chil d-process-and-retrieve-the-pid
     # browser doc. https://docs.python.org/3/library/webbrowser.html
@@ -399,6 +416,7 @@ def prognose():
     Returns:
         zeigt die Prognose in einem Popup
     """
+
     pass
 
 """
@@ -420,17 +438,19 @@ command_dir = f'{path}\historical_data\dashboard\main.py' # setzt den Pfad für 
 # Code von https://stackoverflow.com/questions/24906833/how-to-access-current-location-of-any-user-using-python
 # und https://gis.stackexchange.com/questions/352961/convert-lat-lon-to-zip-postal-code-using-python
 
-geocode = geocoder.ip('me')  # holt die Koordinaten
+geocode = geocoder.ip('me')  # holt die Koordinaten des GUI Nutzers
 geo_locator = geopy.Nominatim(user_agent='1234')
 location = geo_locator.reverse(geocode.latlng)
 zipcode = location.raw['address']['postcode']
 
 # Hintergrundmusik
 
+SOUNDCHECK = True
 pygame.mixer.init()  # initialisiert Sounds
 pygame.mixer.music.load(r".\sounds\background.mp3")
 pygame.mixer.music.set_volume(0.0079)
-pygame.mixer.music.play(loops=-1)  # unendlicher loop für die Hintergrundmusik
+pygame.mixer.music.play(loops=-1)
+
 
 # Setzen von verschiedenen Tabs mithilfe von TTK-Widgets
 
@@ -515,6 +535,12 @@ aktiv = tki.Checkbutton(tab1, width=20, text="nur geöffnete Tankstellen", varia
                         command=aktiv_checkbox)
 check_var.get()
 
+# 1.2.7 Hintergrundmusik aktivieren/deaktivieren
+
+musik_an = tki.Button(root, text="Musik an/aus", padx=50, pady=30, \
+                 command=music_control)
+
+
 # 1.3 Kreieren von Historie und Prognose-Buttons
 # 1.3.1 Start und Ende - müssen 'normale' Buttons sein
 
@@ -535,12 +561,6 @@ hp.set("Auswahl treffen")
 auswahl = tki.OptionMenu(tab2, hp, *auswahl_liste)
 auswahl.config(width = 77, height = 5)
 
-# 1.3.3 Radiobuttons für Preisprognose (Diesel, Super, Super E10) des nächsten Tages
-#folgt
-
-# Outputs für Historie jeweils als Grafik in neuem Fenster
-# Outputs für Prognose jeweils als Textfeld Hinweis
-
 # 1.4 Plotten der Hauptfunktions - Buttons in das Tab 1 GUI - Fenster
 # Es wurde mit place und manuellen Koordinatenübergabe gearbeitet. Alternativ wäre auch .pack() oder .grid mit row &
 # columns für die Platzierung möglich gewesen.
@@ -554,6 +574,7 @@ output_map.place(x=20, y=290)
 los.place(x=340, y=430)
 ende.place(x=20, y=430)
 aktiv.place(x=20, y=80)
+musik_an.place(x=340, y=210)
 
 # 1.5 Plotten der Historie und Prognose - Buttons in das Tab 2 des GUI - Fensters
 auswahl.place(x=20, y=50)
@@ -561,7 +582,7 @@ los2.place(x=340, y=430)
 ende2.place(x=20, y=430)
 
 # 1.6 Mainloop
-root.protocol("WM_DELETE_WINDOW", on_closing)
+root.protocol("WM_DELETE_WINDOW", on_closing) # Protokoll - Handling für (window) close event
 root.mainloop()  # führt eine Endlosschleife durch (startet das sichtbare GUI-Fenster)
 
 
