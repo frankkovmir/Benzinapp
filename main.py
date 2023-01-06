@@ -31,6 +31,7 @@ from threading import Thread
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
 """
 
+
 # 3.1.0 Funktionen für den Haupttab
 # 3.1.1 Funktion für den Beenden-Button bzw. das Beenden per Window - Manager
 
@@ -43,6 +44,7 @@ def on_closing():
     end_sound()
     if messagebox.askokcancel("Beenden", "Wollen Sie das Programm beenden?"):
         root.destroy()
+
 
 def ende_button():
     """Implementiert die Funktion für den Beenden-Button
@@ -159,7 +161,8 @@ def api_check(data):
     full_list = []
     try:
         api_request = requests.get(
-            f"https://creativecommons.tankerkoenig.de/json/list.php?lat={data['lat']}&lng={data['lon']}&rad={radius}&sort=dist&type={kraftstoff}&apikey={key}")
+            f"https://creativecommons.tankerkoenig.de/json/list.php?lat={data['lat']}&lng={data['lon']}"
+            f"&rad={radius}&sort=dist&type={kraftstoff}&apikey={key}")
         api = json.loads(api_request.content)
     except Exception as e:
         api = f"Error..{e}"
@@ -178,12 +181,10 @@ def api_check(data):
         else:
             full_list.append(i)
 
-    new_list = []
     if len(open_list) <= 0:
         new_list = full_list
     else:
         new_list = open_list
-
 
     # Einstieg in die weiteren Funktionen, hier muss noch dafür gesorgt werden, dass in Abhängigkeit vom active Flag
     # die korrekte Liste in die Funktionen übergeben wird (open, oder full)
@@ -247,7 +248,7 @@ def cvs_export(new_list: list):
     file_name = f'csv_export_{export_time}.csv'
     file_path = os.path.join(dir_name, file_name)
     # Dataframe als csv exportieren
-    df.to_csv(file_path, index = False, encoding='utf-8')
+    df.to_csv(file_path, index=False, encoding='utf-8')
     return tki.messagebox.showinfo('CSV-Export', 'CSV erfolgreich generiert.')
 
 
@@ -270,7 +271,7 @@ def pdf_export(new_list):
     interim = [(d['name'], d['street'], str(d['postCode']), str(d['price'])) for d in new_list]
     # Erstelle einen Tuple of Tuples für die render Funktion
     for entry in interim:
-        TABLE_DATA+=(entry,)
+        TABLE_DATA += (entry,)
     TABLE_COL_NAMES = ("Tankstelle", "Straße", "PLZ", "Preis")
     pdf = FPDF()
     pdf.add_page()
@@ -338,6 +339,7 @@ def error_sound():
     error.play()
     return
 
+
 def end_sound():
     """Funktion für den Beendensound
     Returns:
@@ -347,6 +349,7 @@ def end_sound():
     end_sound = pygame.mixer.Sound(r".\sounds\Shutdown.mp3")
     end_sound.play()
     return
+
 
 def music_control():
     """Funktion für den Start/das Ende der Hintergrundmusik
@@ -361,6 +364,7 @@ def music_control():
     else:
         SOUNDCHECK = True
         return pygame.mixer.music.play(loops=-1)
+
 
 # 3.2.0 Funktionen für den Prognose und Historie - Tab
 # 3.2.1 Funktion für den Los-Button
@@ -381,6 +385,7 @@ def los2_button():
         info_sound()
         return prognose()
 
+
 def historie_threaded():
     """Funktion zum Aufruf der Funktion History() in einem eigenen Thread, um nicht den mainloop einzufrieren
     Returns:
@@ -388,6 +393,7 @@ def historie_threaded():
     """
 
     return Thread(target=historie).start()
+
 
 def historie():
     """Funktion für die Historie, öffnet das Dashboard für die historischen Daten. Subprocess ist notwendig,
@@ -399,16 +405,19 @@ def historie():
     # -not-a-chil d-process-and-retrieve-the-pid
     # browser doc. https://docs.python.org/3/library/webbrowser.html
 
-    tki.messagebox.showinfo("Achtung", "Dies startet ein vom GUI getrenntes Python-Skript. Zum Beenden der Verbindung zum Dashboard "
-                                       "muss das Terminal geschlossen werden. Das Schließen des GUI reicht nicht aus!")
+    tki.messagebox.showinfo("Achtung",
+                            "Dies startet ein vom GUI getrenntes Python-Skript. Zum Beenden der Verbindung zum "
+                            "Dashboard "
+                            "muss das Terminal geschlossen werden. Das Schließen des GUI reicht nicht aus!")
     path = Path().absolute()
     command_dir = f'{path}\historical_data\dashboard\main.py'
-    webbrowser.open('http://127.0.0.1:8050', new=1,autoraise=True)
+    webbrowser.open('http://127.0.0.1:8050', new=1, autoraise=True)
     DETACHED_PROCESS = 0x00000008
     CREATE_NEW_PROCESS_GROUP = 0x00000200
     ps = subprocess.Popen(['python', f'{command_dir}'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP)
+                          creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP)
     return ps.communicate()
+
 
 def prognose():
     """Funktion für die Prognose des Preises des nächsten Tages, für alle Kraftstoffe
@@ -417,6 +426,7 @@ def prognose():
     """
 
     pass
+
 
 """
 Part 1 - Erstellen des GUI und der benötigten Buttons / Tabs (Frank Kovmir)
@@ -430,9 +440,9 @@ root = tki.Tk()  # erstellt das Root-Fenster für alle weiteren Widgets (d.h. Bu
 root.title("PKI - Fuel Guru")  # bennent das Fenster
 root.geometry("550x620")  # setzt die Maße, Breite x Höhe
 root.iconbitmap('./icon/gasstation_4334.ico')  # Iconanpassung
-path = Path().absolute() # greift das aktuelle Arbeitsverzeichnis ab
-command_dir = f'{path}\historical_data\dashboard\main.py' # setzt den Pfad für das Historische Daten Dashboard
-root.protocol("WM_DELETE_WINDOW", on_closing) # Protokoll - Handling für (window) close event
+path = Path().absolute()  # greift das aktuelle Arbeitsverzeichnis ab
+command_dir = f'{path}\historical_data\dashboard\main.py'  # setzt den Pfad für das Historische Daten Dashboard
+root.protocol("WM_DELETE_WINDOW", on_closing)  # Protokoll - Handling für (window) close event
 
 # Setzen der derzeitigen User-Postleitzahl im Adressfeld(näherungsweise)
 # Code von https://stackoverflow.com/questions/24906833/how-to-access-current-location-of-any-user-using-python
@@ -451,13 +461,12 @@ pygame.mixer.music.load(r".\sounds\background.mp3")
 pygame.mixer.music.set_volume(0.0079)
 pygame.mixer.music.play(loops=-1)
 
-
 # Setzen von verschiedenen Tabs mithilfe von TTK-Widgets
 
 notebook = ttk.Notebook(root)  # TTK Widget, ist quasi ein Array / eine Sammlung von Widgets
 tab1 = tki.Frame(notebook)  # Frame für Tab 1
 tab2 = tki.Frame(notebook)  # Frame für Tab 2
-tab3 = tki.Frame(notebook) # Frame für Tab 3
+tab3 = tki.Frame(notebook)  # Frame für Tab 3
 notebook.add(tab1, text="Hauptfunktionen")  # Füllt die Tabs in das kreierte Notebook
 notebook.add(tab2, text="Historie und Prognosen")
 notebook.add(tab3, text="Musik-Einstellungen")
@@ -481,8 +490,8 @@ canvas3 = tki.Canvas(tab3)
 canvas3.pack(fill="both", expand=True)
 canvas3.create_image(0, 0, image=bg3, anchor="nw")
 
-photo = tki.PhotoImage(file = r"./icon/speaker-2488096_1280.png")
-small_image = photo.subsample(15,15)
+photo = tki.PhotoImage(file=r"./icon/speaker-2488096_1280.png")
+small_image = photo.subsample(15, 15)
 
 # 1.2 Kreieren von Hauptfunktions-Buttons
 # 1.2.1 Kraftstoff - muss singlechoice Dropdown sein
@@ -534,30 +543,29 @@ output_map = tki.Radiobutton(tab1, text="Streetmap", variable=radio_var, value=3
 
 # 1.2.5 Start und Ende - müssen 'normale' Buttons sein
 
-los = tki.Button(tab1, text="Los", padx=80, pady=60, \
+los = tki.Button(tab1, text="Los", padx=80, pady=60,
                  command=los_button)
 ende = tki.Button(tab1, text='Beenden', padx=60, pady=60, command=ende_button)
 
 # 1.2.6 nur offene Tankstellen anzeigen - Checkbox Button
 
 check_var = tki.IntVar()
-aktiv = tki.Checkbutton(tab1, width=20, text="nur geöffnete Tankstellen", variable=check_var, \
+aktiv = tki.Checkbutton(tab1, width=20, text="nur geöffnete Tankstellen", variable=check_var,
                         command=aktiv_checkbox)
 check_var.get()
 
 # 1.2.7 Hintergrundmusik aktivieren/deaktivieren
 
-musik_an = tki.Button(tab3, image = small_image, text= "Musik aus/an", compound=tki.LEFT, padx=50, pady=30, \
-                 command=music_control)
-
+musik_an = tki.Button(tab3, image=small_image, text="Musik aus/an", compound=tki.LEFT, padx=50, pady=30,
+                      command=music_control)
 
 # 1.3 Kreieren von Historie und Prognose-Buttons
 # 1.3.1 Start und Ende - müssen 'normale' Buttons sein
 
-los2 = tki.Button(tab2, text="Los", padx=80, pady=60, \
+los2 = tki.Button(tab2, text="Los", padx=80, pady=60,
                   command=los2_button)  # Achtung, Funktion fehlt noch
 ende2 = tki.Button(tab2, text='Beenden', padx=60, pady=60, command=ende_button)
-ende3 = tki.Button(tab3, text='Beenden', padx=60, pady=60, command=ende_button) # der Vollständigkeit halber
+ende3 = tki.Button(tab3, text='Beenden', padx=60, pady=60, command=ende_button)  # der Vollständigkeit halber
 
 # 1.3.2 Dropdown für Historie
 
@@ -570,7 +578,7 @@ auswahl_liste = [
 hp = tki.StringVar()
 hp.set("Auswahl treffen")
 auswahl = tki.OptionMenu(tab2, hp, *auswahl_liste)
-auswahl.config(width = 77, height = 5)
+auswahl.config(width=77, height=5)
 
 # 1.4 Plotten der Hauptfunktions - Buttons in das Tab 1 GUI - Fenster
 # Es wurde mit place und manuellen Koordinatenübergabe gearbeitet. Alternativ wäre auch .pack() oder .grid mit row &
@@ -592,10 +600,8 @@ musik_an.place(x=120, y=80)
 auswahl.place(x=20, y=50)
 los2.place(x=340, y=430)
 ende2.place(x=20, y=430)
-ende3.place(x=20, y=430) # der Vollständigkeit halber
+ende3.place(x=20, y=430)  # der Vollständigkeit halber
 
 # 1.6 Mainloop
 
 root.mainloop()  # führt eine Endlosschleife durch (startet das sichtbare GUI-Fenster)
-
-
