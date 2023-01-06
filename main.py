@@ -432,6 +432,7 @@ root.geometry("550x620")  # setzt die Maße, Breite x Höhe
 root.iconbitmap('./icon/gasstation_4334.ico')  # Iconanpassung
 path = Path().absolute() # greift das aktuelle Arbeitsverzeichnis ab
 command_dir = f'{path}\historical_data\dashboard\main.py' # setzt den Pfad für das Historische Daten Dashboard
+root.protocol("WM_DELETE_WINDOW", on_closing) # Protokoll - Handling für (window) close event
 
 # Setzen der derzeitigen User-Postleitzahl im Adressfeld(näherungsweise)
 # Code von https://stackoverflow.com/questions/24906833/how-to-access-current-location-of-any-user-using-python
@@ -556,6 +557,7 @@ musik_an = tki.Button(tab3, image = small_image, text= "Musik aus/an", compound=
 los2 = tki.Button(tab2, text="Los", padx=80, pady=60, \
                   command=los2_button)  # Achtung, Funktion fehlt noch
 ende2 = tki.Button(tab2, text='Beenden', padx=60, pady=60, command=ende_button)
+ende3 = tki.Button(tab3, text='Beenden', padx=60, pady=60, command=ende_button) # der Vollständigkeit halber
 
 # 1.3.2 Dropdown für Historie
 
@@ -586,12 +588,14 @@ aktiv.place(x=20, y=80)
 musik_an.place(x=120, y=80)
 
 # 1.5 Plotten der Historie und Prognose - Buttons in das Tab 2 des GUI - Fensters
+
 auswahl.place(x=20, y=50)
 los2.place(x=340, y=430)
 ende2.place(x=20, y=430)
+ende3.place(x=20, y=430) # der Vollständigkeit halber
 
 # 1.6 Mainloop
-root.protocol("WM_DELETE_WINDOW", on_closing) # Protokoll - Handling für (window) close event
+
 root.mainloop()  # führt eine Endlosschleife durch (startet das sichtbare GUI-Fenster)
 
 
