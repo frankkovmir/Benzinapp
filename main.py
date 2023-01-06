@@ -354,10 +354,9 @@ def music_control():
         kein Wert
     """
     global SOUNDCHECK
-    print(SOUNDCHECK)
+
     if SOUNDCHECK is True:
         SOUNDCHECK = False
-        print(SOUNDCHECK)
         return pygame.mixer.music.stop()
     else:
         SOUNDCHECK = True
@@ -457,11 +456,13 @@ pygame.mixer.music.play(loops=-1)
 notebook = ttk.Notebook(root)  # TTK Widget, ist quasi ein Array / eine Sammlung von Widgets
 tab1 = tki.Frame(notebook)  # Frame für Tab 1
 tab2 = tki.Frame(notebook)  # Frame für Tab 2
+tab3 = tki.Frame(notebook) # Frame für Tab 3
 notebook.add(tab1, text="Hauptfunktionen")  # Füllt die Tabs in das kreierte Notebook
 notebook.add(tab2, text="Historie und Prognosen")
+notebook.add(tab3, text="Musik-Einstellungen")
 notebook.pack(expand=True, fill="both")
 
-# Einfügen eines Hintergrundbildes
+# Einfügen eines Hintergrundbildes und Musikbild
 # Canvas sind grafische html-basierte Elemente der TK Klasse
 
 bg = ImageTk.PhotoImage(Image.open("./icon/bg.jpg"))
@@ -473,6 +474,14 @@ bg2 = ImageTk.PhotoImage(Image.open("./icon/graph.jpg"))
 canvas2 = tki.Canvas(tab2)
 canvas2.pack(fill="both", expand=True)
 canvas2.create_image(0, 0, image=bg2, anchor="nw")
+
+bg3 = ImageTk.PhotoImage(Image.open("./icon/musik_bg.jpg"))
+canvas3 = tki.Canvas(tab3)
+canvas3.pack(fill="both", expand=True)
+canvas3.create_image(0, 0, image=bg3, anchor="nw")
+
+photo = tki.PhotoImage(file = r"./icon/speaker-2488096_1280.png")
+small_image = photo.subsample(15,15)
 
 # 1.2 Kreieren von Hauptfunktions-Buttons
 # 1.2.1 Kraftstoff - muss singlechoice Dropdown sein
@@ -537,7 +546,7 @@ check_var.get()
 
 # 1.2.7 Hintergrundmusik aktivieren/deaktivieren
 
-musik_an = tki.Button(root, text="Musik an/aus", padx=50, pady=30, \
+musik_an = tki.Button(tab3, image = small_image, text= "Musik aus/an", compound=tki.LEFT, padx=50, pady=30, \
                  command=music_control)
 
 
@@ -574,7 +583,7 @@ output_map.place(x=20, y=290)
 los.place(x=340, y=430)
 ende.place(x=20, y=430)
 aktiv.place(x=20, y=80)
-musik_an.place(x=340, y=210)
+musik_an.place(x=120, y=80)
 
 # 1.5 Plotten der Historie und Prognose - Buttons in das Tab 2 des GUI - Fensters
 auswahl.place(x=20, y=50)
