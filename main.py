@@ -2,7 +2,6 @@
 # weiterhin genutzte Dokumentation: https://www.educba.com/python-tkinter/
 # https://www.python-kurs.eu/tkinter_canvas.php für grafische Elemente
 # Pygame Dokumentation für Sounds: https://www.pygame.org/docs/ref/mixer.html
-
 # Import der benötigten Libraries
 
 import tkinter as tki
@@ -17,6 +16,7 @@ import pgeocode
 import string
 import requests
 import json
+import tkintermapview
 from fpdf import FPDF
 import pandas as pd
 from datetime import datetime
@@ -76,6 +76,9 @@ def los_button():
     if r and r.get() == 'Radius wählen':
         info_sound()
         return tki.messagebox.showinfo("Fehlender Input", "Bitte einen Radius angeben!")
+    if sa and sa.get() == 'Sortierung wählen':
+        info_sound()
+        return tki.messagebox.showinfo("Fehlender Input", "Bitte eine Sortierung angeben!")
     if adresse and adresse.get():  # Validierung der Adressdaten (PLZ)
         # im Api Aufruf muss die PLZ in lat / lng als float übergeben werden, siehe tankerkönig-api doc.
         # Ohne Verbindung zur Google API kann nominatim genutzt werden, die Funktion nimmt aber nur eine PLZ entgegen.
@@ -129,8 +132,7 @@ def popup(data):
     else:
         error_sound()
         response = tki.messagebox.showerror("Anfrage gestoppt", "Die Anfrage wurde abgebrochen. Bitte Daten prüfen")
-        tki.Label(tab1, text=response)
-        return
+        return tki.Label(tab1, text=response)
 
 
 # 3.1.4 Funktion für den Einstieg in die Generierungsfunktionen, baut API Verbindung auf
@@ -157,12 +159,20 @@ def api_check(data):
     # in den vom Api unterstützen String um
     kraftstoff = kraftstoff_dict[ks.get()]
     active_flag = aktiv_checkbox()
+    # print(kraftstoff)
+    # Wandelt den Input (Preis, Entfernung) in das benötigte Objekt für die API um (price, dist).
+    sortierung_dict = {'Preis': 'price', 'Entfernung': 'dist'}
+    sortierung = sortierung_dict[sa.get()]
+    active_flag = aktiv_checkbox()
+    # print(sortierung)
+
     open_list = []
     full_list = []
+
     try:
         api_request = requests.get(
-            f"https://creativecommons.tankerkoenig.de/json/list.php?lat={data['lat']}&lng={data['lon']}"
-            f"&rad={radius}&sort=dist&type={kraftstoff}&apikey={key}")
+            f"https://creativecommons.tankerkoenig.de/json/list.php?lat={data['lat']}&lng={data['lon']}&rad={radius}"
+            f"&sort={sortierung}&type={kraftstoff}&apikey={key}")
         api = json.loads(api_request.content)
     except Exception as e:
         api = f"Error..{e}"
@@ -186,15 +196,14 @@ def api_check(data):
     else:
         new_list = open_list
 
-    # Einstieg in die weiteren Funktionen, hier muss noch dafür gesorgt werden, dass in Abhängigkeit vom active Flag
-    # die korrekte Liste in die Funktionen übergeben wird (open, oder full)
+    # Einstieg in die Ausgabefunktionen
 
     if radio_var.get() == 1:
         return cvs_export(new_list)
     if radio_var.get() == 2:
         return pdf_export(new_list)
     if radio_var.get() == 3:
-        return map_export(new_list)
+        map_export(new_list, data, radius)
 
 
 # 3.1.5 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld 'Adresse' (überschreibt den Default Text)
@@ -215,20 +224,40 @@ def click(event):  # es muss ein parameter in die Funktion übergeben werden
 
 
 # 3.1.6 Funktion für die Generierung der Streetmap in einem zweiten Fenster, falls angeklickt im radio-button
+# Quelle :   https: // github.com / TomSchimansky / TkinterMapView
 
-def map_export(new_list):
+
+def map_export(new_list, data, radius):
     """Startet ein neues Fenster in TKinter für die Map-Ausgabe
     Input:
         Liste aus der api_check Funktion
     Returns:
         kein Return-Wert
     """
-
     # ggf. sind globale variablen notwendig um korrekt in das neue frame transportiert zu werden
     newframe = tki.Toplevel()
-    newframe.title('Google Streetview')
+    newframe.title('Mapview')
     newframe.iconbitmap('./icon/gasstation_4334.ico')
+    newframe.geometry("1200x800")
 
+    karte = tkintermapview.TkinterMapView(newframe, width=1200, height=800, corner_radius=0)
+    karte.place(relx=0.5, rely=0.5, anchor=tki.CENTER)
+
+    karte.set_position(data['lat'], data['lon'])
+    if radius == 1:
+        karte.set_zoom(14)
+    elif radius == 2:
+        karte.set_zoom(13)
+    elif radius == 5:
+        karte.set_zoom(12)
+    elif radius == 10:
+        karte.set_zoom(11)
+    else:
+        karte.set_zoom(10)
+
+    for gas_station in new_list:
+        gas_station_text = gas_station["brand"] + "  " + str(gas_station["price"])
+        karte.set_marker(gas_station["lat"], gas_station["lng"], text=gas_station_text)
 
 # 3.1.7 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
 
@@ -250,7 +279,6 @@ def cvs_export(new_list: list):
     # Dataframe als csv exportieren
     df.to_csv(file_path, index=False, encoding='utf-8')
     return tki.messagebox.showinfo('CSV-Export', 'CSV erfolgreich generiert.')
-
 
 # 3.1.8 Funktion für die Generierung des pdf Exports, falls angeklickt im radio-button
 
@@ -314,7 +342,6 @@ def aktiv_checkbox():
         return True
     else:
         return False
-
 
 # 3.1.9.1 Sound - Funktionen
 
@@ -554,7 +581,19 @@ aktiv = tki.Checkbutton(tab1, width=20, text="nur geöffnete Tankstellen", varia
                         command=aktiv_checkbox)
 check_var.get()
 
-# 1.2.7 Hintergrundmusik aktivieren/deaktivieren
+# 1.2.7
+
+sortierung_liste = [
+
+    "Preis",
+    "Entfernung"
+]
+
+sa = tki.StringVar()
+sa.set("Sortierung wählen")
+sortierung = tki.OptionMenu(tab1, sa, *sortierung_liste)
+
+# 1.2.8 Hintergrundmusik aktivieren/deaktivieren
 
 musik_an = tki.Button(tab3, image=small_image, text="Musik aus/an", compound=tki.LEFT, padx=50, pady=30,
                       command=music_control)
@@ -587,6 +626,7 @@ auswahl.config(width=77, height=5)
 adresse.place(x=20, y=20)
 radius.place(x=400, y=20)
 kraftstoff.place(x=230, y=20)
+sortierung.place(x=230, y=80)
 output_cvs.place(x=20, y=190)
 output_pdf.place(x=20, y=240)
 output_map.place(x=20, y=290)
