@@ -124,12 +124,21 @@ def api_check(data):
     # in den vom Api unterstützen String um
     kraftstoff = kraftstoff_dict[ks.get()]
     active_flag = aktiv_checkbox()
+    #print(kraftstoff)
+    #Wandelt den Input (Preis, Entfernung) in das benötigte Objekt für die API um (price, dist).
+    sortierung_dict = {'Preis': 'price', 'Entfernung': 'dist'}
+    sortierung = sortierung_dict[sa.get()]
+    active_flag = aktiv_checkbox()
+    #print(sortierung)
+
     open_list = []
     full_list = []
-    #print(kraftstoff)
+
+
+
     try:
         api_request = requests.get(
-            f"https://creativecommons.tankerkoenig.de/json/list.php?lat={data['lat']}&lng={data['lon']}&rad={radius}&sort=dist&type={kraftstoff}&apikey={key}")
+            f"https://creativecommons.tankerkoenig.de/json/list.php?lat={data['lat']}&lng={data['lon']}&rad={radius}&sort={sortierung}&type={kraftstoff}&apikey={key}")
         api = json.loads(api_request.content)
     except Exception as e:
         api = f"Error..{e}"
@@ -150,7 +159,7 @@ def api_check(data):
         else:
             full_list.append(i)
 
-    full_list.append(data)
+
 
     #print(open_list)
     #print(full_list)
@@ -170,7 +179,7 @@ def api_check(data):
     if radio_var.get() == 2:
         pdf_export(new_list)
     if radio_var.get() == 3:
-        map_export(new_list)  # data einfügen
+        map_export(new_list, data, radius)
 
 
 # 3.1.5 Funktion löscht die PLZ - Eingabemaske bei Klick in das Feld 'Adresse' (überschreibt den Default Text)
@@ -184,8 +193,9 @@ def click(event):  # es muss ein parameter in die Funktion übergeben werden
 
 
 # 3.1.6 Funktion für die Generierung der Streetmap in einem zweiten Fenster, falls angeklickt im radio-button
+# Quelle :   https: // github.com / TomSchimansky / TkinterMapView
 
-def map_export(new_list):
+def map_export(new_list, data, radius):
     # ggf. sind globale variablen notwendig um korrekt in das neue frame transportiert zu werden
     newframe = tki.Toplevel()
     newframe.title('Mapview')
@@ -195,20 +205,27 @@ def map_export(new_list):
     karte = tkintermapview.TkinterMapView(newframe, width=800, height=600, corner_radius=0)
     karte.place(relx=0.5, rely=0.5, anchor = tkinter.CENTER)
 
-    aktuelle_Location = (new_list[-1])
 
-    karte.set_position(aktuelle_Location['lat'], aktuelle_Location['lon'])
-    karte.set_zoom(13)   # Zoom muss an Radius angepasst sein !
+    karte.set_position(data['lat'], data['lon'])
+    if radius == 1:
+        karte.set_zoom(14)
+    elif radius == 2:
+        karte.set_zoom(13)
+    elif radius == 5:
+        karte.set_zoom(13)
+    elif radius == 10:
+        karte.set_zoom(11)
+    else:
+        karte.set_zoom(10)
 
     new_list.pop()
 
-    for s in new_list:
-        gas_station = s
-        karte.set_marker(gas_station["lat"], gas_station["lng"], text=gas_station["name"])
+    for gas_station in new_list:
+        gas_station_text = gas_station["name"] + "  " + str(gas_station["price"])
+        karte.set_marker(gas_station["lat"], gas_station["lng"], text= gas_station_text)
 
 
 
-    # Den Preis anzeigen und möglicherweise die Route auswählen können
 
 
 # 3.1.7 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
@@ -364,6 +381,21 @@ aktiv = tki.Checkbutton(tab1, width=20, text="nur geöffnete Tankstellen", varia
                         command=aktiv_checkbox)
 check_var.get()
 
+# 1.2.7
+
+sortierung_liste = [
+
+    "Preis",
+    "Entfernung"
+]
+
+sa = tki.StringVar()
+sa.set("Sortierung wählen")
+sortierung = tki.OptionMenu(tab1, sa, *sortierung_liste)
+
+
+
+
 # 1.3 Kreieren von Historie und Prognose-Buttons
 # 1.3.1 Start und Ende - müssen 'normale' Buttons sein
 
@@ -387,6 +419,7 @@ ende2 = tki.Button(tab2, text='Beenden', padx=60, pady=60, command=ende_button)
 adresse.place(x=20, y=20)
 radius.place(x=400, y=20)
 kraftstoff.place(x=230, y=20)
+sortierung.place(x=230, y=80)
 output_cvs.place(x=20, y=190)
 output_pdf.place(x=20, y=240)
 output_map.place(x=20, y=290)
