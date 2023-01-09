@@ -17,7 +17,7 @@ import requests
 import json
 import tkintermapview
 from fpdf import FPDF
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import subprocess
 from tkinter.filedialog import askdirectory
@@ -29,28 +29,8 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Dropout, LSTM
-import sys
 import time
-
-# Enable logging to file
-# https://stackoverflow.com/questions/14906764/how-to-redirect-stdout-to-both-file-and-console-with-scripting
-
-class Logger(object):
-    def __init__(self):
-        self.terminal = sys.stdout
-        self.log = open("logfile.log", "a")
-
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
-
-    def flush(self):
-        # this flush method is needed for python 3 compatibility.
-        # this handles the flush command by doing nothing.
-        # you might want to specify some extra behavior here.
-        pass
-
-sys.stdout = Logger()
+from Tooltip import CreateToolTip
 
 """
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
@@ -282,6 +262,7 @@ def map_export(new_list, data, radius):
         gas_station_text = gas_station["brand"] + "  " + str(gas_station["price"])
         karte.set_marker(gas_station["lat"], gas_station["lng"], text=gas_station_text)
 
+
 # 3.1.7 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
 
 def cvs_export(new_list: list):
@@ -302,6 +283,7 @@ def cvs_export(new_list: list):
     # Dataframe als csv exportieren
     df.to_csv(file_path, index=False, encoding='utf-8')
     return tki.messagebox.showinfo('CSV-Export', 'CSV erfolgreich generiert.')
+
 
 # 3.1.8 Funktion für die Generierung des pdf Exports, falls angeklickt im radio-button
 
@@ -365,6 +347,7 @@ def aktiv_checkbox():
         return True
     else:
         return False
+
 
 # 3.1.9.1 Sound - Funktionen
 
@@ -435,6 +418,9 @@ def los2_button():
         if ks_p and ks_p.get() == 'Kraftstoff für Zukunftsprognose wählen':
             info_sound()
             return tki.messagebox.showinfo("Fehlender Input", "Bitte einen Kraftstoff wählen!")
+        if prog_var and prog_var.get() == 0:
+            info_sound()
+            return tki.messagebox.showinfo("Fehlender Input", "Bitte die Anzahl der Datensätze angeben!")
         else:
             info_sound()
             return prognose_threaded()
@@ -472,6 +458,7 @@ def historie():
     ps = subprocess.Popen(['python', f'{command_dir}'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                           creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP)
     return ps.communicate()
+
 
 def prognose_threaded():
     """Funktion für die Prognose des Preises des nächsten Tages, für alle Kraftstoffe
@@ -514,9 +501,10 @@ def prognose():
 
     # wie viele Einträge aus der Vergangenheit möchte ich heranziehen, um den Preis für den nächsten Tag zu berechnen.
     # Hat großen Einfluss auf die Berechnungsgeschwindigkeit, aber auch auf die Modell-Genauigkeit. Ein Wert von
-    # 1000 benötigt etwa 9 Minuten Rechenzeit
+    # 1000 benötigt etwa 10 Minuten Rechenzeit
 
-    prediction_days = 200
+    prog_dict = {1: 60, 2: 250, 3: 1000}
+    prediction_days = prog_dict[prog_var.get()]
 
     x_train = []
     y_train = []
@@ -529,8 +517,8 @@ def prognose():
     x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
 
     # Build the Model
-    model = Sequential()
 
+    model = Sequential()
     model.add(LSTM(units=50, return_sequences=True, input_shape=(x_train.shape[1], 1)))
     model.add(Dropout(0.2))
     model.add(LSTM(units=50, return_sequences=True))
@@ -554,11 +542,13 @@ def prognose():
     prediction = scaler.inverse_transform(prediction)
 
     end = time.time()
-    elapsed = end-start
+    elapsed = end - start
     print('Elapsed time is %f seconds.' % elapsed)
 
-    tki.messagebox.showinfo("Ergebnis", f"Der Kraftstoff {ks_p.get()} hat einen prognostizierten Preis von: "
-                                        f"{prediction[0][0]:.4f} EUR. Die Berechnung brauchte {round(elapsed, 3)} Sekunden.")
+    tki.messagebox.showinfo("Ergebnis", f"Der Kraftstoff {ks_p.get()} hat für den {NextDay_Date_Formatted} einen "
+                                        f"prognostizierten Preis von EUR {prediction[0][0]:.4f}. "
+                                        f"Die Berechnung brauchte {round(elapsed, 3)} Sekunden"
+                                        f" bei einer Iteration über {prediction_days} Datensätze.")
 
 
 """
@@ -576,6 +566,8 @@ root.iconbitmap('./icon/gasstation_4334.ico')  # Iconanpassung
 path = Path().absolute()  # greift das aktuelle Arbeitsverzeichnis ab
 command_dir = f'{path}\historical_data\dashboard\main.py'  # setzt den Pfad für das Historische Daten Dashboard
 root.protocol("WM_DELETE_WINDOW", on_closing)  # Protokoll - Handling für (window) close event
+NextDay_Date = datetime.today() + timedelta(days=1)
+NextDay_Date_Formatted = NextDay_Date.strftime ('%d-%b-%Y')
 
 # Setzen der derzeitigen User-Postleitzahl im Adressfeld(näherungsweise)
 # Code von https://stackoverflow.com/questions/24906833/how-to-access-current-location-of-any-user-using-python
@@ -670,9 +662,9 @@ radio_var = tki.IntVar()  # die Variable wird als ein Integer definiert, um spä
 # Zahlen arbeiten zu können. Alternativ wäre z.B. auch StrVar() möglich, wenn der value "1" gewählt wird
 
 output_cvs = tki.Radiobutton(tab1, text="CVS", variable=radio_var,
-                             value=1)  # Tkinter nutzt eine eigene Syntax für Variablen
-output_pdf = tki.Radiobutton(tab1, text="PDF", variable=radio_var, value=2)
-output_map = tki.Radiobutton(tab1, text="Streetmap", variable=radio_var, value=3)
+                             value=1, activebackground='green')  # Tkinter nutzt eine eigene Syntax für Variablen
+output_pdf = tki.Radiobutton(tab1, text="PDF", variable=radio_var, value=2, activebackground='green')
+output_map = tki.Radiobutton(tab1, text="Streetmap", variable=radio_var, value=3, activebackground='green')
 
 # 1.2.5 Start und Ende - müssen 'normale' Buttons sein
 
@@ -703,12 +695,13 @@ sortierung = tki.OptionMenu(tab1, sa, *sortierung_liste)
 
 musik_an = tki.Button(tab3, image=small_image, text="Musik aus/an", compound=tki.LEFT, padx=50, pady=30,
                       command=music_control)
+CreateToolTip(musik_an, text='Toggle um die Hintergrundmusik zu aktivieren bzw. zu deaktivieren')
 
 # 1.3 Kreieren von Historie und Prognose-Buttons
 # 1.3.1 Start und Ende - müssen 'normale' Buttons sein
 
 los2 = tki.Button(tab2, text="Los", padx=80, pady=60,
-                  command=los2_button)  # Achtung, Funktion fehlt noch
+                  command=los2_button)
 ende2 = tki.Button(tab2, text='Beenden', padx=60, pady=60, command=ende_button)
 ende3 = tki.Button(tab3, text='Beenden', padx=60, pady=60, command=ende_button)  # der Vollständigkeit halber
 
@@ -727,11 +720,32 @@ auswahl.config(width=77, height=5)
 
 # 1.3.3 Buttons um die Prognose für einen Kraftstoff zu spezifizieren
 
-
 ks_p = tki.StringVar()
 ks_p.set("Kraftstoff für Zukunftsprognose wählen")
 prognose_kraftstoff = tki.OptionMenu(tab2, ks_p, *kraftstoff_liste)
 prognose_kraftstoff.config(width=77, height=5)
+CreateToolTip(prognose_kraftstoff, text='Pflichtfeld bei Auswahl "Prognose des nächsten Tages."\n'
+                                        'Kein Effekt bei "Historie"'
+              )
+
+# 1.3.4 Buttons um die Stichgröße für die Prognose zu steuern
+
+prog_var = tki.IntVar()
+prognose1 = tki.Radiobutton(tab2, text="60 Datensätze", variable=prog_var,
+                            value=1, activebackground='green', bd=10)
+prognose2 = tki.Radiobutton(tab2, text="250 Datensätze", variable=prog_var, value=2, activebackground='green', bd=10)
+prognose3 = tki.Radiobutton(tab2, text="1000 Datensätze", variable=prog_var, value=3, activebackground='green', bd=10)
+
+p_l = [prognose1, prognose2, prognose3]
+
+for element in p_l:
+    CreateToolTip(element, text='Pflichtfeld bei Auswahl "Prognose des nächsten Tages." Kein Effekt bei "Historie".\n'
+                                'Dieses Feld bestimmt die Anzahl der Datensätze, die das Modell für die Berechnung'
+                                ' des zukünftigen Preises zugrunde legt.\n'
+                                'Die Genauigkeit der Prognose steigt in der Theorie mit der Anzahl der Datensätze - '
+                                'in jedem Fall steigt aber die Verarbeitungsdauer.\n'
+                                'Bei 1000 Sätzen beträgt die Rechenzeit etwa 10 Minuten.\n'
+                  )
 
 # 1.4 Plotten der Hauptfunktions - Buttons in das Tab 1 GUI - Fenster
 # Es wurde mit place und manuellen Koordinatenübergabe gearbeitet. Alternativ wäre auch .pack() oder .grid mit row &
@@ -751,11 +765,14 @@ musik_an.place(x=120, y=80)
 
 # 1.5 Plotten der Historie und Prognose - Buttons in das Tab 2 des GUI - Fensters
 
-auswahl.place(x=20, y=50)
-prognose_kraftstoff.place(x=20, y=220)
+auswahl.place(x=20, y=20)
+prognose_kraftstoff.place(x=20, y=150)
+prognose1.place(x=20, y=320)
+prognose2.place(x=200, y=320)
+prognose3.place(x=400, y=320)
 los2.place(x=340, y=430)
 ende2.place(x=20, y=430)
-ende3.place(x=20, y=430)  # der Vollständigkeit halber
+ende3.place(x=20, y=430)  # der Vollständigkeit halber, Ende aus dem Musik-Tab
 
 # 1.6 Mainloop
 
