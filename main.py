@@ -31,6 +31,8 @@ from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Dropout, LSTM
 import time
 from Tooltip import CreateToolTip
+import matplotlib.pyplot as plt
+
 
 """
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
@@ -509,6 +511,8 @@ def prognose():
     x_train = []
     y_train = []
 
+    # startet beim gewählten Index und zählt hoch bis zum letzten Index
+
     for x in range(prediction_days, len(scaled_data)):
         x_train.append(scaled_data[x - prediction_days:x, 0])
         y_train.append(scaled_data[x, 0])
@@ -534,7 +538,7 @@ def prognose():
     model_inputs = model_inputs.reshape(-1, 1)
     model_inputs = scaler.transform(model_inputs)
 
-    real_data = [model_inputs[len(model_inputs) + 1 - prediction_days:len(model_inputs + 1), 0]]
+    real_data = [model_inputs[len(model_inputs)-prediction_days:len(model_inputs+1), 0]]
     real_data = np.array(real_data)
     real_data = np.reshape(real_data, (real_data.shape[0], real_data.shape[1], 1))
 
@@ -544,6 +548,7 @@ def prognose():
     end = time.time()
     elapsed = end - start
     print('Elapsed time is %f seconds.' % elapsed)
+
 
     tki.messagebox.showinfo("Ergebnis", f"Der Kraftstoff {ks_p.get()} hat für den {NextDay_Date_Formatted} einen "
                                         f"prognostizierten Preis von EUR {prediction[0][0]:.4f}. "
