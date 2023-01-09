@@ -204,7 +204,7 @@ def api_check(data):
     # Einstieg in die Ausgabefunktionen
 
     if radio_var.get() == 1:
-        return cvs_export(new_list)
+        return csv_export(new_list)
     if radio_var.get() == 2:
         return pdf_export(new_list)
     if radio_var.get() == 3:
@@ -265,9 +265,9 @@ def map_export(new_list, data, radius):
         karte.set_marker(gas_station["lat"], gas_station["lng"], text=gas_station_text)
 
 
-# 3.1.7 Funktion für die Generierung des cvs Exports, falls angeklickt im radio-button
+# 3.1.7 Funktion für die Generierung des csv Exports, falls angeklickt im radio-button
 
-def cvs_export(new_list: list):
+def csv_export(new_list: list):
     """Erstellt eine Tabelle aus den Daten, die durch die API angefragt werden und speichert diese als csv.
 
     Args:
@@ -602,7 +602,7 @@ notebook.add(tab2, text="Historie und Prognosen")
 notebook.add(tab3, text="Musik-Einstellungen")
 notebook.pack(expand=True, fill="both")
 
-# Einfügen eines Hintergrundbildes und Musikbild
+# Einfügen von Hintergrundbildern für die Tabs
 # Canvas sind grafische html-basierte Elemente der TK Klasse
 
 bg = ImageTk.PhotoImage(Image.open("./icon/bg.jpg"))
@@ -659,14 +659,14 @@ adresse.insert(0, zipcode)  # setzt den Default Text (aktuelle PLZ)
 adresse.get()  # speichert den Input
 clicked = adresse.bind('<Button-1>', click)  # ruft die click Funktion zur Löschung des Default - Textes auf
 
-# 1.2.4 Ausgabeformat - muss singlechoice - klick ('radiobutton') sein (Wahl: CVS / PDF / Streetmap)
+# 1.2.4 Ausgabeformat - muss singlechoice - klick ('radiobutton') sein (Wahl: CSV / PDF / Streetmap)
 
 canvas.create_text(110, 145, text="Ausgabeformat wählen", fill="white", font='Helvetica 13 bold')
 
 radio_var = tki.IntVar()  # die Variable wird als ein Integer definiert, um später in einer Funktion mit
 # Zahlen arbeiten zu können. Alternativ wäre z.B. auch StrVar() möglich, wenn der value "1" gewählt wird
 
-output_cvs = tki.Radiobutton(tab1, text="CVS", variable=radio_var,
+output_csv = tki.Radiobutton(tab1, text="CSV", variable=radio_var,
                              value=1, activebackground='green')  # Tkinter nutzt eine eigene Syntax für Variablen
 output_pdf = tki.Radiobutton(tab1, text="PDF", variable=radio_var, value=2, activebackground='green')
 output_map = tki.Radiobutton(tab1, text="Streetmap", variable=radio_var, value=3, activebackground='green')
@@ -760,15 +760,14 @@ adresse.place(x=20, y=20)
 radius.place(x=400, y=20)
 kraftstoff.place(x=230, y=20)
 sortierung.place(x=230, y=80)
-output_cvs.place(x=20, y=190)
+output_csv.place(x=20, y=190)
 output_pdf.place(x=20, y=240)
 output_map.place(x=20, y=290)
 los.place(x=340, y=430)
 ende.place(x=20, y=430)
 aktiv.place(x=20, y=80)
-musik_an.place(x=120, y=80)
 
-# 1.5 Plotten der Historie und Prognose - Buttons in das Tab 2 des GUI - Fensters
+# 1.5 Plotten der Buttons in das Tab 2 des GUI - Fensters
 
 auswahl.place(x=20, y=20)
 prognose_kraftstoff.place(x=20, y=150)
@@ -777,8 +776,12 @@ prognose2.place(x=200, y=320)
 prognose3.place(x=400, y=320)
 los2.place(x=340, y=430)
 ende2.place(x=20, y=430)
+
+# 1.6 Plotten der Buttons in das Tab 3 des GUI - Fensters
+
+musik_an.place(x=120, y=80)
 ende3.place(x=20, y=430)  # der Vollständigkeit halber, Ende aus dem Musik-Tab
 
-# 1.6 Mainloop
+# 1.7 Mainloop
 
 root.mainloop()  # führt eine Endlosschleife durch (startet das sichtbare GUI-Fenster)
