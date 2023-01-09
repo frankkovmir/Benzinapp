@@ -31,7 +31,6 @@ from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Dropout, LSTM
 import time
 from Tooltip import CreateToolTip
-from tkinter import filedialog
 
 """
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
@@ -361,7 +360,7 @@ def pdf_export(new_list):
     month = now.strftime("%m")
     day = now.strftime("%d")
     # Anfrage über Explorer zu Speicherort
-    dir_name = filedialog.askdirectory()
+    dir_name = tki.filedialog.askdirectory()
     # definition der Zusammensetzung des output_file_names
     file_name = f"pdf_export_{day} {month} {year}.pdf"
     # kombination der pfadnamen zu einem vollständigen pfad
