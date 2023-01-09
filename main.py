@@ -8,7 +8,6 @@ import tkinter as tki
 from tkinter import ttk
 from PIL import ImageTk, Image
 from tkinter import messagebox
-import numpy as np
 import pygame
 import geocoder
 import geopy
@@ -18,14 +17,18 @@ import requests
 import json
 import tkintermapview
 from fpdf import FPDF
-import pandas as pd
 from datetime import datetime
 import os
 import subprocess
 from tkinter.filedialog import askdirectory
-from pathlib import Path
 import webbrowser
 from threading import Thread
+from pathlib import Path
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.python.keras.models import Sequential
+from tensorflow.python.keras.layers import Dense, Dropout, LSTM
 
 """
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
@@ -409,8 +412,13 @@ def los2_button():
         info_sound()
         return historie_threaded()
     elif hp and hp.get() == 'Prognose des nächsten Tages':
-        info_sound()
-        return prognose()
+        if ks_p and ks_p.get() == 'Kraftstoff für Zukunftsprognose wählen':
+            info_sound()
+            return tki.messagebox.showinfo("Fehlender Input", "Bitte einen Kraftstoff wählen!")
+        else:
+            print(ks_p.get())
+            info_sound()
+            return prognose_threaded()
 
 
 def historie_threaded():
@@ -445,14 +453,72 @@ def historie():
                           creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP)
     return ps.communicate()
 
+def prognose_threaded():
+    """Funktion für die Prognose des Preises des nächsten Tages, für alle Kraftstoffe
+    Returns:
+        zeigt die Prognose in einem Popup
+    """
+
+    return Thread(target=prognose).start()
+
 
 def prognose():
     """Funktion für die Prognose des Preises des nächsten Tages, für alle Kraftstoffe
     Returns:
         zeigt die Prognose in einem Popup
     """
+    # Code siehe https://www.youtube.com/watch?v=PuZY9q-aKLw&t=1570s
 
-    pass
+    prognose_kraftstoff_dict = {'Diesel': 'diesel', 'Super': 'e5', 'Super E10': 'e10'}  # wandelt den Input
+    # in das Column der Excel um
+    prognose_kraftstoff = prognose_kraftstoff_dict[ks_p.get()]
+    path = Path().absolute()
+    DATA_PATH = f'{path}\historical_data\historical_data.csv'
+    dataset = pd.read_csv(DATA_PATH, sep=",", header=0)
+    dataset_interim = dataset[[f"bundesland", f"{prognose_kraftstoff}"]]
+    dataset_fin = dataset_interim[dataset_interim["bundesland"] == 'bundesweit']
+    prices = dataset_fin[prognose_kraftstoff]
+
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    scaled_data = scaler.fit_transform(dataset_fin[prognose_kraftstoff].values.reshape(-1, 1))
+
+    prediction_days = 60
+
+    x_train = []
+    y_train = []
+
+    for x in range(prediction_days, len(scaled_data)):
+        x_train.append(scaled_data[x - prediction_days:x, 0])
+        y_train.append(scaled_data[x, 0])
+
+    x_train, y_train = np.array(x_train), np.array(y_train)
+    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+
+    # Build the Model
+    model = Sequential()
+
+    model.add(LSTM(units=50, return_sequences=True, input_shape=(x_train.shape[1], 1)))
+    model.add(Dropout(0.2))
+    model.add(LSTM(units=50, return_sequences=True))
+    model.add(Dropout(0.2))
+    model.add(LSTM(units=50))
+    model.add(Dropout(0.2))
+    model.add(Dense(units=1))  # prediction of the next closing value
+
+    model.compile(optimizer='adam', loss='mean_squared_error')
+    model.fit(x_train, y_train, epochs=25, batch_size=32)
+
+    model_inputs = prices.values
+    model_inputs = model_inputs.reshape(-1, 1)
+    model_inputs = scaler.transform(model_inputs)
+
+    real_data = [model_inputs[len(model_inputs) + 1 - prediction_days:len(model_inputs + 1), 0]]
+    real_data = np.array(real_data)
+    real_data = np.reshape(real_data, (real_data.shape[0], real_data.shape[1], 1))
+
+    prediction = model.predict(real_data)
+    prediction = scaler.inverse_transform(prediction)
+    tki.messagebox.showinfo("Ergebnis", f"Der Kraftstoff {prognose_kraftstoff} hat einen prognostizierten Preis von: {prediction} EUR")
 
 
 """
@@ -606,7 +672,7 @@ los2 = tki.Button(tab2, text="Los", padx=80, pady=60,
 ende2 = tki.Button(tab2, text='Beenden', padx=60, pady=60, command=ende_button)
 ende3 = tki.Button(tab3, text='Beenden', padx=60, pady=60, command=ende_button)  # der Vollständigkeit halber
 
-# 1.3.2 Dropdown für Historie
+# 1.3.2 Dropdown für Historie und Prognose
 
 auswahl_liste = [
 
@@ -618,6 +684,14 @@ hp = tki.StringVar()
 hp.set("Auswahl treffen")
 auswahl = tki.OptionMenu(tab2, hp, *auswahl_liste)
 auswahl.config(width=77, height=5)
+
+# 1.3.3 Buttons um die Prognose für einen Kraftstoff zu spezifizieren
+
+
+ks_p = tki.StringVar()
+ks_p.set("Kraftstoff für Zukunftsprognose wählen")
+prognose_kraftstoff = tki.OptionMenu(tab2, ks_p, *kraftstoff_liste)
+prognose_kraftstoff.config(width=77, height=5)
 
 # 1.4 Plotten der Hauptfunktions - Buttons in das Tab 1 GUI - Fenster
 # Es wurde mit place und manuellen Koordinatenübergabe gearbeitet. Alternativ wäre auch .pack() oder .grid mit row &
@@ -638,6 +712,7 @@ musik_an.place(x=120, y=80)
 # 1.5 Plotten der Historie und Prognose - Buttons in das Tab 2 des GUI - Fensters
 
 auswahl.place(x=20, y=50)
+prognose_kraftstoff.place(x=20, y=220)
 los2.place(x=340, y=430)
 ende2.place(x=20, y=430)
 ende3.place(x=20, y=430)  # der Vollständigkeit halber
