@@ -37,7 +37,7 @@ import sys
 class Logger(object):
     def __init__(self):
         self.terminal = sys.stdout
-        self.log = open("FuelGuru.log", "a")
+        self.log = open("logfile.log", "a")
 
     def write(self, message):
         self.terminal.write(message)
@@ -183,12 +183,10 @@ def api_check(data):
     # in den vom Api unterstützen String um
     kraftstoff = kraftstoff_dict[ks.get()]
     active_flag = aktiv_checkbox()
-    # print(kraftstoff)
     # Wandelt den Input (Preis, Entfernung) in das benötigte Objekt für die API um (price, dist).
     sortierung_dict = {'Preis': 'price', 'Entfernung': 'dist'}
     sortierung = sortierung_dict[sa.get()]
     active_flag = aktiv_checkbox()
-    # print(sortierung)
 
     open_list = []
     full_list = []
@@ -437,7 +435,6 @@ def los2_button():
             info_sound()
             return tki.messagebox.showinfo("Fehlender Input", "Bitte einen Kraftstoff wählen!")
         else:
-            print(ks_p.get())
             info_sound()
             return prognose_threaded()
 
@@ -461,6 +458,7 @@ def historie():
     # -not-a-chil d-process-and-retrieve-the-pid
     # browser doc. https://docs.python.org/3/library/webbrowser.html
 
+    info_sound()
     tki.messagebox.showinfo("Achtung",
                             "Dies startet ein vom GUI getrenntes Python-Skript. Zum Beenden der Verbindung zum "
                             "Dashboard "
@@ -490,6 +488,10 @@ def prognose():
     """
     # Code siehe https://www.youtube.com/watch?v=PuZY9q-aKLw&t=1570s
 
+    info_sound()
+    tki.messagebox.showinfo("Disclaimer", "Es handelt sich hierbei um eine Schätzung, basierend auf den von "
+                                          "Tankerkoenig für Nordrhein-Westfalen zur Verfügung gestellten historischen "
+                                          "Daten seit 2019. Die Berechnung beginnt nach einem Klick auf 'OK'.")
     prognose_kraftstoff_dict = {'Diesel': 'diesel', 'Super': 'e5', 'Super E10': 'e10'}  # wandelt den Input
     # in das Column der Excel um
     prognose_kraftstoff = prognose_kraftstoff_dict[ks_p.get()]
@@ -497,7 +499,7 @@ def prognose():
     DATA_PATH = f'{path}\historical_data\historical_data.csv'
     dataset = pd.read_csv(DATA_PATH, sep=",", header=0)
     dataset_interim = dataset[[f"bundesland", f"{prognose_kraftstoff}"]]
-    dataset_fin = dataset_interim[dataset_interim["bundesland"] == 'bundesweit']
+    dataset_fin = dataset_interim[dataset_interim["bundesland"] == 'Nordrhein-Westfalen']
     prices = dataset_fin[prognose_kraftstoff]
 
     scaler = MinMaxScaler(feature_range=(0, 1))
@@ -539,7 +541,8 @@ def prognose():
 
     prediction = model.predict(real_data)
     prediction = scaler.inverse_transform(prediction)
-    tki.messagebox.showinfo("Ergebnis", f"Der Kraftstoff {ks_p.get()} hat einen prognostizierten Preis von: {prediction} EUR")
+    tki.messagebox.showinfo("Ergebnis", f"Der Kraftstoff {ks_p.get()} hat einen prognostizierten Preis von: "
+                                        f"{prediction[0][0]} EUR.")
 
 
 """
