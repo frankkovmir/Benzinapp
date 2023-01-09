@@ -29,6 +29,27 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Dropout, LSTM
+import sys
+
+# Enable logging to file
+# https://stackoverflow.com/questions/14906764/how-to-redirect-stdout-to-both-file-and-console-with-scripting
+
+class Logger(object):
+    def __init__(self):
+        self.terminal = sys.stdout
+        self.log = open("FuelGuru.log", "a")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        # this flush method is needed for python 3 compatibility.
+        # this handles the flush command by doing nothing.
+        # you might want to specify some extra behavior here.
+        pass
+
+sys.stdout = Logger()
 
 """
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
@@ -518,7 +539,7 @@ def prognose():
 
     prediction = model.predict(real_data)
     prediction = scaler.inverse_transform(prediction)
-    tki.messagebox.showinfo("Ergebnis", f"Der Kraftstoff {prognose_kraftstoff} hat einen prognostizierten Preis von: {prediction} EUR")
+    tki.messagebox.showinfo("Ergebnis", f"Der Kraftstoff {ks_p.get()} hat einen prognostizierten Preis von: {prediction} EUR")
 
 
 """
