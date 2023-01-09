@@ -30,6 +30,7 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Dropout, LSTM
 import sys
+import time
 
 # Enable logging to file
 # https://stackoverflow.com/questions/14906764/how-to-redirect-stdout-to-both-file-and-console-with-scripting
@@ -486,15 +487,19 @@ def prognose():
     Returns:
         zeigt die Prognose in einem Popup
     """
-    # Code siehe https://www.youtube.com/watch?v=PuZY9q-aKLw&t=1570s
+    # Code in Anlehnung an https://www.youtube.com/watch?v=PuZY9q-aKLw&t=1570s
 
     info_sound()
     tki.messagebox.showinfo("Disclaimer", "Es handelt sich hierbei um eine Schätzung, basierend auf den von "
-                                          "Tankerkoenig für Nordrhein-Westfalen zur Verfügung gestellten historischen "
+                                          "'Tankerkoenig' für Nordrhein-Westfalen zur Verfügung gestellten "
+                                          "historischen "
                                           "Daten seit 2019. Die Berechnung beginnt nach einem Klick auf 'OK'.")
-    prognose_kraftstoff_dict = {'Diesel': 'diesel', 'Super': 'e5', 'Super E10': 'e10'}  # wandelt den Input
-    # in das Column der Excel um
+
+    # Umwandlung des Inputs in das Column-name der Excel
+    prognose_kraftstoff_dict = {'Diesel': 'diesel', 'Super': 'e5', 'Super E10': 'e10'}
     prognose_kraftstoff = prognose_kraftstoff_dict[ks_p.get()]
+
+    # Heranziehen der historischen Daten Datei und Filterung für Preisdaten in NRW
     path = Path().absolute()
     DATA_PATH = f'{path}\historical_data\historical_data.csv'
     dataset = pd.read_csv(DATA_PATH, sep=",", header=0)
@@ -502,10 +507,16 @@ def prognose():
     dataset_fin = dataset_interim[dataset_interim["bundesland"] == 'Nordrhein-Westfalen']
     prices = dataset_fin[prognose_kraftstoff]
 
+    # Skaliert alle vorhandenen Daten in eine Range zwischen 0 und 1
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled_data = scaler.fit_transform(dataset_fin[prognose_kraftstoff].values.reshape(-1, 1))
+    start = time.time()
 
-    prediction_days = 60
+    # wie viele Einträge aus der Vergangenheit möchte ich heranziehen, um den Preis für den nächsten Tag zu berechnen.
+    # Hat großen Einfluss auf die Berechnungsgeschwindigkeit, aber auch auf die Modell-Genauigkeit. Ein Wert von
+    # 1000 benötigt etwa 9 Minuten Rechenzeit
+
+    prediction_days = 200
 
     x_train = []
     y_train = []
@@ -541,8 +552,13 @@ def prognose():
 
     prediction = model.predict(real_data)
     prediction = scaler.inverse_transform(prediction)
+
+    end = time.time()
+    elapsed = end-start
+    print('Elapsed time is %f seconds.' % elapsed)
+
     tki.messagebox.showinfo("Ergebnis", f"Der Kraftstoff {ks_p.get()} hat einen prognostizierten Preis von: "
-                                        f"{prediction[0][0]} EUR.")
+                                        f"{prediction[0][0]:.4f} EUR. Die Berechnung brauchte {round(elapsed, 3)} Sekunden.")
 
 
 """
