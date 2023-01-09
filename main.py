@@ -410,23 +410,23 @@ def los2_button():
         Einstieg in Prognose oder Historie Funktion
     """
 
-    if hp and hp.get() == "Auswahl treffen":
+    if ks_p and ks_p.get() == 'Kraftstoff für Zukunftsprognose wählen':
         info_sound()
-        return tki.messagebox.showinfo("Fehlender Input", "Bitte eine Auswahl treffen!")
-    elif hp and hp.get() == 'Historie':
+        return tki.messagebox.showinfo("Fehlender Input", "Bitte einen Kraftstoff wählen!")
+    if prog_var and prog_var.get() == 0:
         info_sound()
-        return historie_threaded()
-    elif hp and hp.get() == 'Prognose des nächsten Tages':
-        if ks_p and ks_p.get() == 'Kraftstoff für Zukunftsprognose wählen':
-            info_sound()
-            return tki.messagebox.showinfo("Fehlender Input", "Bitte einen Kraftstoff wählen!")
-        if prog_var and prog_var.get() == 0:
-            info_sound()
-            return tki.messagebox.showinfo("Fehlender Input", "Bitte die Anzahl der Datensätze angeben!")
-        else:
-            info_sound()
-            return prognose_threaded()
+        return tki.messagebox.showinfo("Fehlender Input", "Bitte die Anzahl der Datenpunkte angeben!")
+    else:
+        info_sound()
+        return prognose_threaded()
 
+def los3_button():
+    """Funktion für den Losbutton im dritten Tab für Historie
+    Returns:
+        Ruft die Historien Funktion auf
+    """
+
+    return historie_threaded()
 
 def historie_threaded():
     """Funktion zum Aufruf der Funktion History() in einem eigenen Thread, um nicht den mainloop einzufrieren
@@ -553,7 +553,7 @@ def prognose():
     tki.messagebox.showinfo("Ergebnis", f"Der Kraftstoff {ks_p.get()} hat für den {NextDay_Date_Formatted} einen "
                                         f"prognostizierten Preis von EUR {prediction[0][0]:.4f}. "
                                         f"Die Berechnung brauchte {round(elapsed, 3)} Sekunden"
-                                        f" bei einer Iteration über {prediction_days} Datensätze.")
+                                        f" bei einer Iteration über {prediction_days} Datenpunkte.")
 
 
 """
@@ -597,9 +597,11 @@ notebook = ttk.Notebook(root)  # TTK Widget, ist quasi ein Array / eine Sammlung
 tab1 = tki.Frame(notebook)  # Frame für Tab 1
 tab2 = tki.Frame(notebook)  # Frame für Tab 2
 tab3 = tki.Frame(notebook)  # Frame für Tab 3
+tab4 = tki.Frame(notebook)
 notebook.add(tab1, text="Hauptfunktionen")  # Füllt die Tabs in das kreierte Notebook
-notebook.add(tab2, text="Historie und Prognosen")
-notebook.add(tab3, text="Musik-Einstellungen")
+notebook.add(tab2, text="Prognosen")
+notebook.add(tab3, text="Historie")
+notebook.add(tab4, text="Musik-Einstellungen")
 notebook.pack(expand=True, fill="both")
 
 # Einfügen von Hintergrundbildern für die Tabs
@@ -615,10 +617,15 @@ canvas2 = tki.Canvas(tab2)
 canvas2.pack(fill="both", expand=True)
 canvas2.create_image(0, 0, image=bg2, anchor="nw")
 
-bg3 = ImageTk.PhotoImage(Image.open("./icon/musik_bg.jpg"))
+bg3 = ImageTk.PhotoImage(Image.open("./icon/graph.jpg"))
 canvas3 = tki.Canvas(tab3)
 canvas3.pack(fill="both", expand=True)
 canvas3.create_image(0, 0, image=bg3, anchor="nw")
+
+bg4 = ImageTk.PhotoImage(Image.open("./icon/musik_bg.jpg"))
+canvas4 = tki.Canvas(tab4)
+canvas4.pack(fill="both", expand=True)
+canvas4.create_image(0, 0, image=bg4, anchor="nw")
 
 photo = tki.PhotoImage(file=r"./icon/speaker-2488096_1280.png")
 small_image = photo.subsample(15, 15)
@@ -698,7 +705,7 @@ sortierung = tki.OptionMenu(tab1, sa, *sortierung_liste)
 
 # 1.2.8 Hintergrundmusik aktivieren/deaktivieren
 
-musik_an = tki.Button(tab3, image=small_image, text="Musik aus/an", compound=tki.LEFT, padx=50, pady=30,
+musik_an = tki.Button(tab4, image=small_image, text="Musik aus/an", compound=tki.LEFT, padx=50, pady=30,
                       command=music_control)
 CreateToolTip(musik_an, text='Toggle um die Hintergrundmusik zu aktivieren bzw. zu deaktivieren')
 
@@ -707,21 +714,11 @@ CreateToolTip(musik_an, text='Toggle um die Hintergrundmusik zu aktivieren bzw. 
 
 los2 = tki.Button(tab2, text="Los", padx=80, pady=60,
                   command=los2_button)
+los3 = tki.Button(tab3, text="Los", padx=80, pady=60,
+                  command=los3_button)
 ende2 = tki.Button(tab2, text='Beenden', padx=60, pady=60, command=ende_button)
 ende3 = tki.Button(tab3, text='Beenden', padx=60, pady=60, command=ende_button)  # der Vollständigkeit halber
-
-# 1.3.2 Dropdown für Historie und Prognose
-
-auswahl_liste = [
-
-    "Historie",
-    "Prognose des nächsten Tages"
-]
-
-hp = tki.StringVar()
-hp.set("Auswahl treffen")
-auswahl = tki.OptionMenu(tab2, hp, *auswahl_liste)
-auswahl.config(width=77, height=5)
+ende4 = tki.Button(tab4, text='Beenden', padx=60, pady=60, command=ende_button)  # der Vollständigkeit halber
 
 # 1.3.3 Buttons um die Prognose für einen Kraftstoff zu spezifizieren
 
@@ -729,25 +726,22 @@ ks_p = tki.StringVar()
 ks_p.set("Kraftstoff für Zukunftsprognose wählen")
 prognose_kraftstoff = tki.OptionMenu(tab2, ks_p, *kraftstoff_liste)
 prognose_kraftstoff.config(width=77, height=5)
-CreateToolTip(prognose_kraftstoff, text='Pflichtfeld bei Auswahl "Prognose des nächsten Tages."\n'
-                                        'Kein Effekt bei "Historie"'
-              )
+
 
 # 1.3.4 Buttons um die Stichgröße für die Prognose zu steuern
 
 prog_var = tki.IntVar()
-prognose1 = tki.Radiobutton(tab2, text="60 Datensätze", variable=prog_var,
+prognose1 = tki.Radiobutton(tab2, text="60 Datenpunkte", variable=prog_var,
                             value=1, activebackground='green', bd=10)
-prognose2 = tki.Radiobutton(tab2, text="250 Datensätze", variable=prog_var, value=2, activebackground='green', bd=10)
-prognose3 = tki.Radiobutton(tab2, text="1000 Datensätze", variable=prog_var, value=3, activebackground='green', bd=10)
+prognose2 = tki.Radiobutton(tab2, text="250 Datenpunkte", variable=prog_var, value=2, activebackground='green', bd=10)
+prognose3 = tki.Radiobutton(tab2, text="1000 Datenpunkte", variable=prog_var, value=3, activebackground='green', bd=10)
 
 p_l = [prognose1, prognose2, prognose3]
 
 for element in p_l:
-    CreateToolTip(element, text='Pflichtfeld bei Auswahl "Prognose des nächsten Tages." Kein Effekt bei "Historie".\n'
-                                'Dieses Feld bestimmt die Anzahl der Datensätze, die das Modell für die Berechnung'
+    CreateToolTip(element, text='Dieses Feld bestimmt die Anzahl der Datenpunkte, die das Modell für die Berechnung'
                                 ' des zukünftigen Preises zugrunde legt.\n'
-                                'Die Genauigkeit der Prognose steigt in der Theorie mit der Anzahl der Datensätze - '
+                                'Die Genauigkeit der Prognose steigt in der Theorie mit der Anzahl der Datenpunkte - '
                                 'in jedem Fall steigt aber die Verarbeitungsdauer.\n'
                                 'Bei 1000 Sätzen beträgt die Rechenzeit etwa 10 Minuten.\n'
                   )
@@ -769,19 +763,23 @@ aktiv.place(x=20, y=80)
 
 # 1.5 Plotten der Buttons in das Tab 2 des GUI - Fensters
 
-auswahl.place(x=20, y=20)
-prognose_kraftstoff.place(x=20, y=150)
-prognose1.place(x=20, y=320)
-prognose2.place(x=200, y=320)
-prognose3.place(x=400, y=320)
+prognose_kraftstoff.place(x=20, y=50)
+prognose1.place(x=20, y=250)
+prognose2.place(x=200, y=250)
+prognose3.place(x=380, y=250)
 los2.place(x=340, y=430)
 ende2.place(x=20, y=430)
 
 # 1.6 Plotten der Buttons in das Tab 3 des GUI - Fensters
 
-musik_an.place(x=120, y=80)
-ende3.place(x=20, y=430)  # der Vollständigkeit halber, Ende aus dem Musik-Tab
+los3.place(x=340, y=430)
+ende3.place(x=20, y=430)
 
-# 1.7 Mainloop
+# 1.7 Plotten der Buttons in das Tab 4 des GUI - Fensters
+
+musik_an.place(x=120, y=80)
+ende4.place(x=20, y=430)
+
+# 1.8 Mainloop
 
 root.mainloop()  # führt eine Endlosschleife durch (startet das sichtbare GUI-Fenster)
