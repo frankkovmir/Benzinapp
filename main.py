@@ -16,7 +16,7 @@ import string
 import requests
 import json
 import tkintermapview
-from fpdf import FPDF
+from fpdf import FPDF, XPos, YPos
 from datetime import datetime, timedelta
 import os
 import subprocess
@@ -31,8 +31,7 @@ from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Dropout, LSTM
 import time
 from Tooltip import CreateToolTip
-import matplotlib.pyplot as plt
-
+from tkinter import filedialog
 
 """
 Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
@@ -303,25 +302,79 @@ def pdf_export(new_list):
     # Erstelle ein leeres Tuple für Concatenation
     TABLE_DATA = ()
     # Estelle eine Interims Liste mit Tuples aus der übergebenen new_list, die Zahlen (PLZ, Preis) müssen Strings sein
-    interim = [(d['name'], d['street'], str(d['postCode']), str(d['price'])) for d in new_list]
+    interim = [(d['brand'].title(), str(d['postCode']), str(d['dist']), str(d['price'])) for d in new_list]
     # Erstelle einen Tuple of Tuples für die render Funktion
     for entry in interim:
+        if entry[0] == "": continue
         TABLE_DATA += (entry,)
-    TABLE_COL_NAMES = ("Tankstelle", "Straße", "PLZ", "Preis")
-    pdf = FPDF()
+    TABLE_COL_NAMES = ("Tankstelle", "Postleitzahl", "Entfernung in km", "Preis in EUR")
+    title = "Deine Tankstellen"
+
+    class PDF(FPDF):
+        def header(self):
+            # Logo
+            self.image("./icon/pdf_hintergrund_bild.jfif", 10, 8, 25)
+            # font
+            self.set_font('helvetica', 'B', 20)
+            # Calculate width of title and position
+            title_w = self.get_string_width(title) + 6
+            # Start Punkt für Titel definieren
+            doc_w = self.w
+            self.set_x((doc_w - title_w) / 2)
+            # colors of frame, background, and text
+            self.set_draw_color(0, 80, 180)  # border = blue
+            self.set_fill_color(230, 230, 0)  # background = yellow
+            self.set_text_color(50, 50, 200)  # text = blue
+            # Title
+            self.cell(title_w, 10, title, border=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C', fill=True)
+            # Line break
+            self.ln(30)
+
+        # Page footer
+        def footer(self):
+            # Set position of the footer
+            self.set_y(
+                -15)  # dieser Wert ist negativ, weil ich 15 mm von der unterkante messen möchte, bei positivem Wert misst man von der oberkante
+            # set font
+            self.set_font('helvetica', 'I', 8)
+            # Page number
+            self.cell(0, 10, f'Page {self.page_no()}/{{nb}}', align='C')
+
+    pdf = PDF()
     pdf.add_page()
     pdf.set_font("Times", size=10)
+    pdf = PDF('p', 'mm', 'A4')
+    # Anzahl der Seitenanzahl
+    pdf.alias_nb_pages()
+    # eine Seite hinzufügen
+    pdf.add_page()
+    pdf.cell(0, 10, 'Tankerkönig Homepage', new_x=XPos.LMARGIN, new_y=YPos.NEXT, link="https://creativecommons.tankerkoenig.de/")
+    pdf.set_font("Times", size=10)
+    # pdf.set_text_color(220,0,0)
+    pdf.set_auto_page_break(auto=True, margin=15)
     line_height = pdf.font_size * 2.5
-    col_width = pdf.epw / 4  # distribute content evenly
+    col_width = pdf.epw / 4
+
+    # datetime objekt enthält aktuelles Datum in Format # dd/mm/YY
+    now = datetime.now()
+    year = now.strftime("%Y")
+    month = now.strftime("%m")
+    day = now.strftime("%d")
+    # Anfrage über Explorer zu Speicherort
+    dir_name = filedialog.askdirectory()
+    # definition der Zusammensetzung des output_file_names
+    file_name = f"pdf_export_{day} {month} {year}.pdf"
+    # kombination der pfadnamen zu einem vollständigen pfad
+    file_path = os.path.join(dir_name, file_name)
 
     # siehe https://pyfpdf.github.io/fpdf2/Tables.html (repeat table header on each page)
 
     def render_table_header():
         pdf.set_font(style="B")  # enabling bold text
         for col_name in TABLE_COL_NAMES:
-            pdf.cell(col_width, line_height, col_name, border=1)
+            pdf.cell(col_width, line_height, col_name, border=1, align='C')
         pdf.ln(line_height)
-        pdf.set_font(style="")  # disabling bold text
+        pdf.set_font('helvetica', style="")  # disabling bold text
 
     render_table_header()
 
@@ -331,9 +384,9 @@ def pdf_export(new_list):
         for column in row:
             # fixes UnicodeEncodeError if character is not latin1
             column = column.encode('latin-1', 'replace').decode('latin-1')
-            pdf.cell(col_width, line_height, column, border=1)
+            pdf.cell(col_width, line_height, column, border=1, align='C')
         pdf.ln(line_height)
-    pdf.output("Tankstellen_in_deiner_Naehe.pdf")  # hier könnte dynamisch das aktuelle Datum eingetragen werden
+    pdf.output(file_path)
 
 
 # 3.1.9 Funktion, um nur aktive Tankstellen anzuzeigen. Soll je nach Checkbox Status ein True (checked)
@@ -627,8 +680,8 @@ canvas4 = tki.Canvas(tab4)
 canvas4.pack(fill="both", expand=True)
 canvas4.create_image(0, 0, image=bg4, anchor="nw")
 
-photo = tki.PhotoImage(file=r"./icon/speaker-2488096_1280.png")
-small_image = photo.subsample(15, 15)
+photo_music = tki.PhotoImage(file=r"./icon/speaker-2488096_1280.png")
+small_image_music = photo_music.subsample(15, 15)
 
 # 1.2 Kreieren von Hauptfunktions-Buttons
 # 1.2.1 Kraftstoff - muss singlechoice Dropdown sein
@@ -705,7 +758,7 @@ sortierung = tki.OptionMenu(tab1, sa, *sortierung_liste)
 
 # 1.2.8 Hintergrundmusik aktivieren/deaktivieren
 
-musik_an = tki.Button(tab4, image=small_image, text="Musik aus/an", compound=tki.LEFT, padx=50, pady=30,
+musik_an = tki.Button(tab4, image=small_image_music, text="Musik aus/an", compound=tki.LEFT, padx=50, pady=30,
                       command=music_control)
 CreateToolTip(musik_an, text='Toggle um die Hintergrundmusik zu aktivieren bzw. zu deaktivieren')
 
@@ -714,10 +767,10 @@ CreateToolTip(musik_an, text='Toggle um die Hintergrundmusik zu aktivieren bzw. 
 
 los2 = tki.Button(tab2, text="Los", padx=80, pady=60,
                   command=los2_button)
-los3 = tki.Button(tab3, text="Los", padx=80, pady=60,
+los3 = tki.Button(tab3, text="Historisches Daten Dashboard", width=72, height=7,
                   command=los3_button)
 ende2 = tki.Button(tab2, text='Beenden', padx=60, pady=60, command=ende_button)
-ende3 = tki.Button(tab3, text='Beenden', padx=60, pady=60, command=ende_button)  # der Vollständigkeit halber
+ende3 = tki.Button(tab3, text='Beenden', width=72, height=8, command=ende_button)  # der Vollständigkeit halber
 ende4 = tki.Button(tab4, text='Beenden', padx=60, pady=60, command=ende_button)  # der Vollständigkeit halber
 
 # 1.3.3 Buttons um die Prognose für einen Kraftstoff zu spezifizieren
@@ -772,8 +825,8 @@ ende2.place(x=20, y=430)
 
 # 1.6 Plotten der Buttons in das Tab 3 des GUI - Fensters
 
-los3.place(x=340, y=430)
-ende3.place(x=20, y=430)
+los3.place(x=20, y=50)
+ende3.place(x=20, y=400)
 
 # 1.7 Plotten der Buttons in das Tab 4 des GUI - Fensters
 
