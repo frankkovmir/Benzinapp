@@ -33,7 +33,7 @@ import time
 from Tooltip import CreateToolTip
 
 """
-Part 3 - Implementierung der Button - Funktionen (Frank Kovmir)
+Part 3 - Implementierung der Button - Funktionen
 """
 
 
@@ -144,10 +144,9 @@ def popup(data):
 
 def api_check(data):
     """Part 2 - Aufruf der API
-
     Baut den API-Aufruf auf und führt diesen durch.
     Input:
-        Data Numy-Dictionary mit der Longitude / Langitude aus der Funktion popup
+        Data Numpy-Dictionary mit der Longitude / Langitude aus der Funktion popup
     Returns:
         Beendet die Funktion bei einem nicht-erfolgreichen API-Aufruf, oder verzweigt
         in eine der Output-Funktionen (mit Uebergabe des Ergebnisses aus dem API-Aufruf)
@@ -229,7 +228,6 @@ def click(event):  # es muss ein parameter in die Funktion übergeben werden
 # 3.1.6 Funktion für die Generierung der Streetmap in einem zweiten Fenster, falls angeklickt im radio-button
 # Quelle :   https: // github.com / TomSchimansky / TkinterMapView
 
-
 def map_export(new_list, data, radius):
     """Startet ein neues Fenster in TKinter für die Map-Ausgabe
     Input:
@@ -271,6 +269,7 @@ def csv_export(new_list: list):
     Args:
         new_list (list): Liste mit multiplen dicts. Je Zeile ein dict.
     """
+
     # erstellt dataframe aus den dicts
     df = pd.DataFrame(new_list)
     # jeder Export erhält einen datetime Stempel
@@ -294,17 +293,14 @@ def pdf_export(new_list):
     Returns:
         kein Return-Wert
     """
-    # vielleicht noch eine Überschrift
-    # lange Einträge müssten gecuttet werden, damit das Format schön bleibt
-    # Explorer fürs Speichern
 
-    # Erstelle ein leeres Tuple für Concatenation
+    # Erstelle ein leeres Tuple für spätere Bildung von Tuple in Tuple
     TABLE_DATA = ()
     # Estelle eine Interims Liste mit Tuples aus der übergebenen new_list, die Zahlen (PLZ, Preis) müssen Strings sein
     interim = [(d['brand'].title(), str(d['postCode']), str(d['dist']), str(d['price'])) for d in new_list]
     # Erstelle einen Tuple of Tuples für die render Funktion
     for entry in interim:
-        if entry[0] == "": continue
+        if entry[0] == "": continue # Aussteuern von Tankstellen ohne Brand, um Leere Felder im PDF zu verhindern
         TABLE_DATA += (entry,)
     TABLE_COL_NAMES = ("Tankstelle", "Postleitzahl", "Entfernung in km", "Preis in EUR")
     title = "Deine Tankstellen"
@@ -743,7 +739,7 @@ aktiv = tki.Checkbutton(tab1, width=20, text="nur geöffnete Tankstellen", varia
                         command=aktiv_checkbox)
 check_var.get()
 
-# 1.2.7
+# 1.2.7 Sortierungsmoeglichkeiten als Drop-Down (Sven Simon Szczesny)
 
 sortierung_liste = [
 
@@ -761,13 +757,14 @@ musik_an = tki.Button(tab4, image=small_image_music, text="Musik aus/an", compou
                       command=music_control)
 CreateToolTip(musik_an, text='Toggle um die Hintergrundmusik zu aktivieren bzw. zu deaktivieren')
 
-# 1.3 Kreieren von Historie und Prognose-Buttons
+# 1.3 Kreieren von Historie-, Prognose-, und Musikbutton(s)
 # 1.3.1 Start und Ende - müssen 'normale' Buttons sein
 
 los2 = tki.Button(tab2, text="Los", padx=80, pady=60,
                   command=los2_button)
 los3 = tki.Button(tab3, text="Historisches Daten Dashboard", width=72, height=7,
                   command=los3_button)
+CreateToolTip(los3, text='Toggle um das Dashboard für die historischen Daten im Browser zu öffnen')
 ende2 = tki.Button(tab2, text='Beenden', padx=60, pady=60, command=ende_button)
 ende3 = tki.Button(tab3, text='Beenden', width=72, height=8, command=ende_button)  # der Vollständigkeit halber
 ende4 = tki.Button(tab4, text='Beenden', padx=60, pady=60, command=ende_button)  # der Vollständigkeit halber
@@ -778,7 +775,6 @@ ks_p = tki.StringVar()
 ks_p.set("Kraftstoff für Zukunftsprognose wählen")
 prognose_kraftstoff = tki.OptionMenu(tab2, ks_p, *kraftstoff_liste)
 prognose_kraftstoff.config(width=77, height=5)
-
 
 # 1.3.4 Buttons um die Stichgröße für die Prognose zu steuern
 
