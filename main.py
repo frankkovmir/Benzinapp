@@ -513,7 +513,7 @@ def historie():
 def prognose_threaded():
     """Funktion für die Prognose des Preises des nächsten Tages, für alle Kraftstoffe
     Returns:
-        zeigt die Prognose in einem Popup
+        startet die Hauptfunktion für die Prognose in einem eigenen Thrad
     """
 
     return Thread(target=prognose).start()
@@ -522,7 +522,7 @@ def prognose_threaded():
 def prognose():
     """Funktion für die Prognose des Preises des nächsten Tages, für alle Kraftstoffe
     Returns:
-        zeigt die Prognose in einem Popup
+        zeigt den prognostizierten Preis für den gewählten Kraftstoff in einem Popup
     """
     # Code in Anlehnung an https://www.youtube.com/watch?v=PuZY9q-aKLw&t=1570s
 
@@ -605,7 +605,7 @@ def prognose():
 
 
 """
-Part 1 - Erstellen des GUI und der benötigten Buttons / Tabs (Frank Kovmir)
+Part 1 - Erstellen des GUI und der benötigten Buttons / Tabs
 Das Erstellen dieser Objekte mit Tkinter ist ein zweistufiger Prozess - erst wird das "Widget" definiert
 (alles in Tkinter ist ein Widget) und dann in das Fenster (d.h. in den root) geplottet.
 """
