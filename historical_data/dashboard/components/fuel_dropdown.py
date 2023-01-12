@@ -4,9 +4,7 @@ import pandas as pd
 import sys
 import os
 sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)))))
-sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')))
 from ids import FUEL_DROPDOWN, SELECT_ALL_FUELS_BUTTON
-from loader import DataSchema
 
 def render_fuel_dropdown(app: Dash, data: pd.DataFrame) -> html.Div:
 
