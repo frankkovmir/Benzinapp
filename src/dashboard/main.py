@@ -11,7 +11,7 @@ sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__
 from layout import create_layout
 from loader import load_data
 
-DATA_PATH = Path(__file__).parents[1] / 'historical_data.csv'
+DATA_PATH = Path(__file__).parents[2] / 'data' / 'historical_data.csv'
 
 def main():
 

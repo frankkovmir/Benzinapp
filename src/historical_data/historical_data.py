@@ -1,15 +1,13 @@
 import git
 from pathlib import Path
-from datetime import date, datetime, timedelta
-from dateutil.relativedelta import relativedelta
-import re
+from datetime import date, timedelta
 import pandas as pd
 import os
 import shutil
 
 TODAYS_DATE = date.today()
-GIT_PATH = Path(__file__).parent / 'tankerkoenig-data'
-FILE_PATH = Path(__file__)
+TANKERKOENIG_PATH = Path(__file__).parents[2] / 'data' / 'tankerkoenig-data'
+DATA_PATH = TANKERKOENIG_PATH.parent
 
 def git_pull_tankerkoenig() -> str:
     """Führt einen git pull aus um die Tankerkönig Daten (csv) zu aktualisieren
@@ -18,7 +16,7 @@ def git_pull_tankerkoenig() -> str:
         str: git pull Nachricht
     """
     # git Klasse zum kommunizieren mit dem git binary
-    g = git.cmd.Git(GIT_PATH)
+    g = git.cmd.Git(TANKERKOENIG_PATH)
     # Pull ausführen
     return g.pull()
 
@@ -33,8 +31,8 @@ def get_csv_paths():
     """
 
     # Pfade zu den Ordnern für Preise und Stationen
-    prices_dir_path = GIT_PATH / f'prices'
-    stations_dir_path = GIT_PATH / f'stations'
+    prices_dir_path = TANKERKOENIG_PATH / f'prices'
+    stations_dir_path = TANKERKOENIG_PATH / f'stations'
     # Die Ordner haben weitere Unterordner. Für beide werden alle csv Pfade in einer Liste gespeichert zusammengefügt
     prices_paths = list(prices_dir_path.rglob('*.csv*'))
     stations_paths = list(stations_dir_path.rglob('*.csv*'))
@@ -97,7 +95,7 @@ def create_bundesland_attribute(post_code: pd.Series) -> pd.Series:
         pd.Series: Neue Spalte mit Bundesländern
     """
     # Dictionary mit PLZ als Key und Bundesland als Value
-    plz_dict = dict(pd.read_excel(Path(__file__).parent / 'Liste-der-PLZ-in-Excel-Karte-Deutschland-Postleitzahlen.xlsx',
+    plz_dict = dict(pd.read_excel(DATA_PATH / 'Liste-der-PLZ-in-Excel-Karte-Deutschland-Postleitzahlen.xlsx',
                                   dtype={'PLZ':'str'},
                                   usecols=['PLZ', 'Bundesland']).values)
     bundeslaender = post_code.map(plz_dict)
@@ -111,7 +109,7 @@ def check_historical_data() -> bool:
     Returns:
         bool: True wenn der Datensatz bereits existiert
     """
-    file_exists =  os.path.exists(FILE_PATH.parent / 'historical_data.csv')
+    file_exists =  os.path.exists(DATA_PATH / 'historical_data.csv')
     return file_exists
 
 
@@ -154,7 +152,7 @@ def initial_data_load():
     prices_paths, stations_paths = split_list(all_csv_paths)
     # Dataframe erstellen
     df = create_historical_dataframe(prices_paths, stations_paths)
-    df.to_csv(FILE_PATH.parent / 'historical_data.csv', encoding='utf-8', index=False)
+    df.to_csv(DATA_PATH / 'historical_data.csv', encoding='utf-8', index=False)
     print('Historischer Datensatz wurde erstellt.')
 
 
@@ -165,7 +163,7 @@ def remove_old_data():
     dirs = ['prices', 'stations']
     for dir in dirs:
         # Preis- oder Stations-Ordner
-        path = GIT_PATH / dir
+        path = TANKERKOENIG_PATH / dir
         # prices und stations haben multiple Unterordner die nur das jeweilige Jahr als Bezeichnung haben
         years_dirs = os.listdir(path)
         # Stations-Ordner hat außer den Unterordnern eine weitere Datei mit den aktuellen Stationen
@@ -174,7 +172,7 @@ def remove_old_data():
 
         for years_dir in years_dirs:
             # Es werden nur die Ordner für das aktuelle und das Vorjahr benötigt
-            if TODAYS_DATE.year - int(years_dir) >= 1:
+            if int(years_dir) <= 2018:
                 dir_to_remove = path / years_dir
                 # Ordner mit gesamten Inhalten löschen
                 shutil.rmtree(dir_to_remove, ignore_errors=True)
@@ -187,7 +185,7 @@ def check_historical_data_version() -> bool:
     Returns:
         bool: True wenn der Datensatz aktuell ist
     """
-    df = pd.read_csv(FILE_PATH.parent / 'historical_data.csv', parse_dates=['date'])
+    df = pd.read_csv(DATA_PATH / 'historical_data.csv', parse_dates=['date'])
     # letztes Datum im Datensatz
     recent_date = df['date'].iloc[-1].date()
     # aktueller Datensatz hat Daten vom Vortag, timedelta.days muss also 1 sein
@@ -204,7 +202,7 @@ def list_date_difference() -> list:
     Returns:
         list: Liste mit den Daten, jedes Objekt in der Liste ist ein datetime.date
     """
-    df = pd.read_csv(FILE_PATH.parent / 'historical_data.csv', parse_dates=['date'])
+    df = pd.read_csv(DATA_PATH / 'historical_data.csv', parse_dates=['date'])
     # letztes Datum im Datensatz
     recent_date = df['date'].iloc[-1].date()
     # Liste mit allen Tagen nach recent_date bis gestern
@@ -214,9 +212,11 @@ def list_date_difference() -> list:
 
 
 def update_historical_data():
-
+    """Updatet den historischen Datensatz. Alle Daten der Tage seit dem letzten Update,
+    die noch nicht aggregiert sind, werden dem Datensatz angehängt.
+    """
     # Historischen Datensatz laden
-    df = pd.read_csv(FILE_PATH.parent / 'historical_data.csv', parse_dates=['date'])
+    df = pd.read_csv(DATA_PATH / 'historical_data.csv', parse_dates=['date'])
     # Alle Daten (Datum) die der historische Datensatz zurückliegt
     dates = list_date_difference()
     # zugehörige Pfade der benötigten CSV Dateien werden in Listen gespeichert
@@ -225,8 +225,8 @@ def update_historical_data():
 
     for date in dates:
         year, month, day = date.year, date.month, date.day
-        prices_path = GIT_PATH / 'prices' / str(year) / f'{month:02}' / f'{year}-{month:02}-{day:02}-prices.csv'
-        stations_path = GIT_PATH / 'stations' / str(year) / f'{month:02}' / f'{year}-{month:02}-{day:02}-stations.csv'
+        prices_path = TANKERKOENIG_PATH / 'prices' / str(year) / f'{month:02}' / f'{year}-{month:02}-{day:02}-prices.csv'
+        stations_path = TANKERKOENIG_PATH / 'stations' / str(year) / f'{month:02}' / f'{year}-{month:02}-{day:02}-stations.csv'
         prices_paths.append(prices_path)
         stations_paths.append(stations_path)
 
@@ -235,7 +235,7 @@ def update_historical_data():
     df = pd.concat([df, new_data], ignore_index=True)
     # selbe Anzahl an Zeilen die hinzugefügt werden, werden vom Anfang des Datensatzes entfernt
     # df = df.iloc[len(new_data):].reset_index(drop=True)
-    df.to_csv(FILE_PATH.parent / 'historical_data.csv', encoding='utf-8', index=False)
+    df.to_csv(DATA_PATH / 'historical_data.csv', encoding='utf-8', index=False)
     print('Historischer Datensatz wurde aktualisiert.')
 
 
@@ -243,7 +243,7 @@ def main():
     # Tankerkoenig Daten aktualisieren
     print(git_pull_tankerkoenig())
     # Historischen Datensatz erstellen falls nicht vorhanden
-    # (Dauer: ca. 20min, getestet mit 8-Kerner Ryzen 7 5800x und CL16 3600MHz RAM)
+    # (Dauer: ca. 50min Stand: 03.01.23, getestet mit 8-Kerner Ryzen 7 5800x und CL16 3600MHz RAM)
     if not check_historical_data():
         initial_data_load()
     # Datensatz aktualisieren falls nicht aktuell
@@ -255,4 +255,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    # initial_data_load()

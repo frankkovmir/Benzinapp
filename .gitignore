@@ -1,7 +1,4 @@
-historical_data/test_notebook.ipynb
-historical_data/dashboard_test.ipynb
-historical_data/dashboard.ipynb
-historical_data/tankerkoenig-data/prices
-historical_data/tankerkoenig-data/stations
-historical_data/archiv
+data/tankerkoenig-data/prices
+data/tankerkoenig-data/stations
+src/dashboard/archiv
 __pycache__

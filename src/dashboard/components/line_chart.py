@@ -23,9 +23,9 @@ def render_line_chart(app: Dash, data: pd.DataFrame) -> html.Div:
             return html.Div('Keine Daten ausgewählt oder Daten nicht verfügbar.')
 
         # Plot erstellen
-        fig = px.line(filtered_df, 
-                      x=DataSchema.DATE, 
-                      y=[fuel.lower() for fuel in fuels], 
+        fig = px.line(filtered_df,
+                      x=DataSchema.DATE,
+                      y=[fuel.lower() for fuel in fuels],
                       color=DataSchema.BUNDESLAND,
                       labels={
                           DataSchema.DATE: 'Datum',
