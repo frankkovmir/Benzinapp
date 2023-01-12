@@ -10,17 +10,23 @@ sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__
 sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')))
 from layout import create_layout
 from loader import load_data
+from colorama import init as colorama_init
 
-DATA_PATH = Path(__file__).parents[2] / 'data' / 'historical_data.csv'
+path = Path().absolute()
+DATA_PATH = f'{path}\historical_data\historical_data.csv'
 
-def main():
-
+try:
+    colorama_init()
+    print("~" * 80)
+    print("\x1b[6;30;42m" + "This Dashboard is running from the Application 'Fuel Guru'.\nCopyright: Sam Barjesteh, "
+                            "Hicham Ben Ayoub, " "Frank Kovmir, Sven Simon Szczesny."
+                            "\nAny kind of distribution is prohibited without previous consent." + "\x1b[0m")
+    print("~" * 80)
+    print("\n" * 3)
     data = load_data(DATA_PATH)
     app = Dash(external_stylesheets=[BOOTSTRAP])
     app.title = 'Historische Daten Dashboard'
     app.layout = create_layout(app, data)
     app.run()
-
-
-if __name__ == '__main__':
-    main()
+except Exception as e:
+    print(e)
