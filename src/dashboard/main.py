@@ -6,15 +6,13 @@ from dash_bootstrap_components.themes import BOOTSTRAP
 from pathlib import Path
 import sys
 import os
-
 sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'components')))
 sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')))
 from layout import create_layout
 from loader import load_data
 from colorama import init as colorama_init
 
-path = Path().absolute()
-DATA_PATH = f'{path}\historical_data\historical_data.csv'
+DATA_PATH = Path(__file__).parents[2] / 'data' / 'historical_data.csv'
 
 try:
     colorama_init()

@@ -501,7 +501,7 @@ def historie():
                             "Dashboard "
                             "muss das Terminal geschlossen werden. Das Schließen des GUI reicht nicht aus!")
     path = Path().absolute()
-    command_dir = f'{path}\historical_data\dashboard\main.py'
+    command_dir = f'{path}\src\dashboard\main.py'
     webbrowser.open('http://127.0.0.1:8050', new=1, autoraise=True)
     DETACHED_PROCESS = 0x00000008
     CREATE_NEW_PROCESS_GROUP = 0x00000200
@@ -538,7 +538,7 @@ def prognose():
 
     # Heranziehen der historischen Daten Datei und Filterung für Preisdaten in NRW
     path = Path().absolute()
-    DATA_PATH = f'{path}\historical_data\historical_data.csv'
+    DATA_PATH = f'{path}\data\historical_data.csv'
     dataset = pd.read_csv(DATA_PATH, sep=",", header=0)
     dataset_interim = dataset[[f"bundesland", f"{prognose_kraftstoff}"]]
     dataset_fin = dataset_interim[dataset_interim["bundesland"] == 'Nordrhein-Westfalen']
@@ -617,7 +617,7 @@ root.title("PKI - Fuel Guru")  # bennent das Fenster
 root.geometry("550x620")  # setzt die Maße, Breite x Höhe
 root.iconbitmap('./icon/gasstation_4334.ico')  # Iconanpassung
 path = Path().absolute()  # greift das aktuelle Arbeitsverzeichnis ab
-command_dir = f'{path}\historical_data\dashboard\main.py'  # setzt den Pfad für das Historische Daten Dashboard
+command_dir = f'{path}\src\dashboard\main.py'  # setzt den Pfad für das Historische Daten Dashboard
 root.protocol("WM_DELETE_WINDOW", on_closing)  # Protokoll - Handling für (window) close event
 NextDay_Date = datetime.today() + timedelta(days=1)
 NextDay_Date_Formatted = NextDay_Date.strftime ('%d-%b-%Y')
