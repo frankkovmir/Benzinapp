@@ -1,4 +1,3 @@
 data/tankerkoenig-data
-src/historical_data/archiv
 __pycache__
 /hooks/hooks-tensorflow.py
