@@ -303,7 +303,7 @@ def pdf_export(new_list):
         if entry[0] == "": continue # Aussteuern von Tankstellen ohne Brand, um Leere Felder im PDF zu verhindern
         TABLE_DATA += (entry,)
     TABLE_COL_NAMES = ("Tankstelle", "Postleitzahl", "Entfernung in km", "Preis in EUR")
-    title = "Deine Tankstellen"
+    title = "Tankstellen in deiner Nähe"
 
     class PDF(FPDF):
         def header(self):
