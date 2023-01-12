@@ -280,9 +280,13 @@ def csv_export(new_list: list):
     file_name = f'csv_export_{export_time}.csv'
     file_path = os.path.join(dir_name, file_name)
     # Dataframe als csv exportieren
-    df.to_csv(file_path, index=False, encoding='utf-8')
-    info_sound()
-    return tki.messagebox.showinfo('CSV-Export', 'CSV erfolgreich generiert.')
+    try:
+        df.to_csv(file_path, index=False, encoding='utf-8')
+        info_sound()
+        return tki.messagebox.showinfo('CSV-Export', 'CSV erfolgreich generiert.')
+    except Exception as e:
+        print(e)
+        return
 
 
 # 3.1.8 Funktion für die Generierung des pdf Exports, falls angeklickt im radio-button
@@ -382,9 +386,13 @@ def pdf_export(new_list):
             column = column.encode('latin-1', 'replace').decode('latin-1')
             pdf.cell(col_width, line_height, column, border=1, align='C')
         pdf.ln(line_height)
-    pdf.output(file_path)
-    info_sound()
-    return tki.messagebox.showinfo('PDF-Export', 'PDF erfolgreich generiert.')
+    try:
+        pdf.output(file_path)
+        info_sound()
+        return tki.messagebox.showinfo('PDF-Export', 'PDF erfolgreich generiert.')
+    except Exception as e:
+        print(e)
+        return
 
 # 3.1.9 Funktion, um nur aktive Tankstellen anzuzeigen. Soll je nach Checkbox Status ein True (checked)
 # oder ein False returnen. Wird über die export Funktionen geprüft (if aktiv_checkbox() is True ..)
