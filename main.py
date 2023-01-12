@@ -281,6 +281,7 @@ def csv_export(new_list: list):
     file_path = os.path.join(dir_name, file_name)
     # Dataframe als csv exportieren
     df.to_csv(file_path, index=False, encoding='utf-8')
+    info_sound()
     return tki.messagebox.showinfo('CSV-Export', 'CSV erfolgreich generiert.')
 
 
@@ -382,7 +383,8 @@ def pdf_export(new_list):
             pdf.cell(col_width, line_height, column, border=1, align='C')
         pdf.ln(line_height)
     pdf.output(file_path)
-
+    info_sound()
+    return tki.messagebox.showinfo('PDF-Export', 'PDF erfolgreich generiert.')
 
 # 3.1.9 Funktion, um nur aktive Tankstellen anzuzeigen. Soll je nach Checkbox Status ein True (checked)
 # oder ein False returnen. Wird über die export Funktionen geprüft (if aktiv_checkbox() is True ..)
