@@ -1,7 +1,7 @@
 """Der Code zum Erstellen des Dashboards ist angelehnt an das Tutorial vom Youtuber ArjanCodes
 Quelle: https://www.youtube.com/watch?v=XOFrvzWFM7Y&t=438s&ab_channel=ArjanCodes"""
 
-from dash import Dash, html
+from dash import Dash
 from dash_bootstrap_components.themes import BOOTSTRAP
 from pathlib import Path
 import sys
