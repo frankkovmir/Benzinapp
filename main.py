@@ -276,6 +276,9 @@ def csv_export(new_list: list):
     export_time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
     # öffnet Datei Explorer damit man den Pfad aussuchen kann, wo die csv gespeichert werden soll
     dir_name = askdirectory()
+    # Eventhandling für Auswahl == Abbrechen
+    if (len(dir_name) == 0):
+        return
     # Dateinamen mit Zeitstempel erstellen und Pfad zusammenfügen
     file_name = f'csv_export_{export_time}.csv'
     file_path = os.path.join(dir_name, file_name)
@@ -362,6 +365,9 @@ def pdf_export(new_list):
     day = now.strftime("%d")
     # Anfrage über Explorer zu Speicherort
     dir_name = tki.filedialog.askdirectory()
+    # Event Handler bei Click auf "Cancel", sonst wird die Datei auch bei Abbruch gespeichert
+    if (len(dir_name) == 0):
+        return
     # definition der Zusammensetzung des output_file_names
     file_name = f"pdf_export_{day} {month} {year}.pdf"
     # kombination der pfadnamen zu einem vollständigen pfad
@@ -388,8 +394,11 @@ def pdf_export(new_list):
         pdf.ln(line_height)
     try:
         pdf.output(file_path)
-        info_sound()
-        return tki.messagebox.showinfo('PDF-Export', 'PDF erfolgreich generiert.')
+        if os.path.exists(file_path):
+            info_sound()
+            return tki.messagebox.showinfo('PDF-Export', 'PDF erfolgreich generiert.')
+        else:
+            return tki.messagebox.showinfo('PDF-Export', 'PDF nicht erfolgreich generiert.')
     except Exception as e:
         print(e)
         return
