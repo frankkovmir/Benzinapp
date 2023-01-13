@@ -1,7 +1,7 @@
 # Allgemein
 
 Der aktuelle Stand des aggregierten historischen Datensatzes beinhaltet Daten bis zum 12.01.2023 und ist dem Projekt beigefügt.
-Die historical_data.py ermöglicht es, einen aggregierten Datensatz herzustellen, falls noch keiner vorhanden ist oder den bereits vorhanden mit neuen Daten zu füllen,
+Die historical_data.py ermöglicht es, einen aggregierten Datensatz herzustellen, falls noch keiner vorhanden ist oder den bereits vorhandenen mit neuen Daten zu füllen,
 wenn bereits neue Daten vorhanden sind. Diese Datei kann allerdings nur ausgeführt werden wenn folgende Bedingungen erfüllt sind.
 
 ## Verbindung zum Tankerkönig Repository herstellen
@@ -19,11 +19,11 @@ cd data
 ```
 Das Klonen kann über HTTPS oder SSH stattfinden.
 
-Klonen per HTTPS
+### Klonen per HTTPS
 ```shell
 git clone https://tankerkoenig@dev.azure.com/tankerkoenig/tankerkoenig-data/_git/tankerkoenig-data
 ```
-Klonen per SSH
+### Klonen per SSH
 ```shell
 git clone git@ssh.dev.azure.com:v3/tankerkoenig/tankerkoenig-data/tankerkoenig-data
 ```
