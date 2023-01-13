@@ -511,7 +511,7 @@ def historie():
                             "Dashboard "
                             "muss das Terminal geschlossen werden. Das Schließen des GUI reicht nicht aus!")
     path = Path().absolute()
-    command_dir = f'{path}\src\dashboard\main.py'
+    command_dir = path / 'src' / 'dashboard' / 'main.py'
     webbrowser.open('http://127.0.0.1:8050', new=1, autoraise=True)
     DETACHED_PROCESS = 0x00000008
     CREATE_NEW_PROCESS_GROUP = 0x00000200
@@ -611,7 +611,7 @@ def prognose():
     tki.messagebox.showinfo("Ergebnis", f"Der Kraftstoff {ks_p.get()} hat für den {NextDay_Date_Formatted} einen "
                                         f"prognostizierten Preis von EUR {prediction[0][0]:.4f}. "
                                         f"Die Berechnung brauchte {round(elapsed, 3)} Sekunden"
-                                        f" bei einer Iteration über {prediction_days} Datenpunkte.")
+                                        f" bei einer Iteration über {prediction_days} Datenpunkten.")
 
 
 """
@@ -801,7 +801,7 @@ for element in p_l:
                                 ' des zukünftigen Preises zugrunde legt.\n'
                                 'Die Genauigkeit der Prognose steigt in der Theorie mit der Anzahl der Datenpunkte - '
                                 'in jedem Fall steigt aber die Verarbeitungsdauer.\n'
-                                'Bei 1000 Sätzen beträgt die Rechenzeit etwa 10 Minuten.\n'
+                                'Bei 1000 Punkten beträgt die Rechenzeit etwa 10 Minuten.\n'
                   )
 
 # 1.4 Plotten der Hauptfunktions - Buttons in das Tab 1 GUI - Fenster

@@ -13,7 +13,15 @@ from loader import DataSchema
 
 
 def render_bundeslaender_dropdown(app: Dash, data: pd.DataFrame) -> html.Div:
+    """Zuständig zum Rendern des Bundesländer-Dropdowns und verarbeiten der Daten
 
+    Args:
+        app (Dash): Dash app, die in main erstellt wird
+        data (pd.DataFrame): Historische Daten
+
+    Returns:
+        html.Div: Bundesländer-Dropdown als Div
+    """
     # alle Bundesländer des historischen Datensatzes als Liste
     all_bundeslaender = list(data[DataSchema.BUNDESLAND].unique())
     # Kommunikation über Callsbacks in Dash, ändert die Werte im dcc.Dropdown

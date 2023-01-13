@@ -13,7 +13,15 @@ from loader import DataSchema
 
 
 def render_year_dropdown(app: Dash, data: pd.DataFrame) -> html.Div:
+    """Zuständig zum Rendern des Jahres-Dropdowns und verarbeiten der Daten
 
+    Args:
+        app (Dash): Dash app, die in main erstellt wird
+        data (pd.DataFrame): Historische Daten
+
+    Returns:
+        html.Div: Jahres-Dropdown als Div
+    """
     all_years = list(data[DataSchema.YEAR].unique())
 
     @app.callback(Output(YEAR_DROPDOWN, "value"), Input(SELECT_ALL_YEARS_BUTTON, "n_clicks"))

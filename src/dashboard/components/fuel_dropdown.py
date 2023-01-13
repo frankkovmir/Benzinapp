@@ -9,7 +9,15 @@ from ids import FUEL_DROPDOWN, SELECT_ALL_FUELS_BUTTON
 
 
 def render_fuel_dropdown(app: Dash, data: pd.DataFrame) -> html.Div:
+    """Zuständig zum Rendern des Kraftstoff-Dropdowns und verarbeiten der Daten
 
+    Args:
+        app (Dash): Dash app, die in main erstellt wird
+        data (pd.DataFrame): Historische Daten
+
+    Returns:
+        html.Div: Kraftstoff-Dropdown als Div
+    """
     all_fuels = ["Diesel", "E5", "E10"]
 
     @app.callback(Output(FUEL_DROPDOWN, "value"), Input(SELECT_ALL_FUELS_BUTTON, "n_clicks"))

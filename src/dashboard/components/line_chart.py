@@ -14,6 +14,15 @@ from loader import DataSchema
 
 
 def render_line_chart(app: Dash, data: pd.DataFrame) -> html.Div:
+    """Zuständig zum Rendern des Liniendiagramms und Kommunikation mit den anderen Komponenten
+
+    Args:
+        app (Dash): Dash app, die in main erstellt wird
+        data (pd.DataFrame): Historische Daten
+
+    Returns:
+        html.Div: Liniendiagramm als Div
+    """
     @app.callback(
         Output(LINE_CHART, "children"),
         [

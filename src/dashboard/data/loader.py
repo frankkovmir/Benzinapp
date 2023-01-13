@@ -13,6 +13,7 @@ class DataSchema:
 
 def load_data(path: str) -> pd.DataFrame:
     """Historischen Datensatz als Pandas Dataframe laden
+    und Spalte für 'Jahr' erstellen
 
     Args:
         path (str): Pfad zum historischen Datensatz
