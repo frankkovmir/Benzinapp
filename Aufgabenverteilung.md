@@ -7,6 +7,7 @@
 ## Frank
 - GUI - Design, Funktionen
 - Prognose - Funktion
+- Tooltip, Readme
 ## Sven
 - Map - Export
 - API - Aufruf
