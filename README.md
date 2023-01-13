@@ -5,7 +5,7 @@ Teilnehmer: Sam Barjesteh, Hicham Ben Ayoub, Frank Kovmir, Sven Simon Szczesny
 
 Das Programm kann entweder über die FuelGuru.exe im Archiv ausgeführt, oder über einen Python Interpreter
 mittels Kompilierung der main.py im Hauptordner gestartet werden. (Entweder durch Import des gesamten Ordners in eine IDE, oder per Shell-Aufruf).
-In beiden Fällen ist es notwendig, dass sich der Icon-, der Sound-, und der historical_data Ordner im selben Verzeichnis befindet, wie die main.py bzw. FuelGuru.exe Datei.
+In beiden Fällen ist es notwendig, dass sich der Icon-, der Sound-, und der data Ordner im selben Verzeichnis befindet, wie die main.py bzw. FuelGuru.exe Datei.
 
 # Ausführen per Terminal
 
@@ -47,7 +47,7 @@ Sollten bei dem Aufruf der main.py importierte Module fehlen, so sind diese per 
 
 ![grafik](https://user-images.githubusercontent.com/114833933/210899951-b74d4360-1dee-463e-b6f9-506df495473d.png)
 
-Sollten bei dem Start der Anwendung (.exe) Fehler entstehen, dann befindet sich die .exe vermutlich nicht im Hauptordner zusammen mit den Abhängigkeiten "icon", "sounds" und "historical_data"
+Sollten bei dem Start der Anwendung (.exe) Fehler entstehen, dann befindet sich die .exe vermutlich nicht im Hauptordner zusammen mit den Abhängigkeiten "icon", "sounds" und "data"
 
 ![grafik](https://user-images.githubusercontent.com/114833933/210901385-532ac98a-bffd-410a-a063-93a0af3fc61a.png)
 
