@@ -8,7 +8,7 @@ mittels Kompilierung der main.py im Hauptordner gestartet werden. (Entweder durc
 In beiden Fällen ist es notwendig, dass die folgende Ordnerstruktur genau so eingehalten wird.
 
 # Ordnerstruktur
-
+```
 Benzinapp
 │   .gitignore
 │   main.py
@@ -71,6 +71,7 @@ Benzinapp
             historical_data.py
             README.md
             __init__.py
+```
 
 # Environment Setup
 
