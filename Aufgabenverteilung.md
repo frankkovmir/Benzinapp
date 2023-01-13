@@ -1,0 +1,17 @@
+# Aufgabenverteilung
+
+## Sam
+- Alles aus dem Ordner src (Dashboard, Historical_Data)
+- Environment Setup
+- Readme
+## Frank
+- GUI - Design, Funktionen
+- Prognose - Funktion
+## Sven
+- Map - Export
+- API - Aufruf
+- Testing
+# Hicham
+- PDF - Export
+- CVS - Export
+- Testing

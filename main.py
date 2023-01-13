@@ -162,7 +162,6 @@ def api_check(data):
     kraftstoff_dict = {'Diesel': 'diesel', 'Super': 'e5', 'Super E10': 'e10'}  # wandelt den Kraftstoff-Input (Diesel)
     # in den vom Api unterstützen String um
     kraftstoff = kraftstoff_dict[ks.get()]
-    active_flag = aktiv_checkbox()
     # Wandelt den Input (Preis, Entfernung) in das benötigte Objekt für die API um (price, dist).
     sortierung_dict = {'Preis': 'price', 'Entfernung': 'dist'}
     sortierung = sortierung_dict[sa.get()]
