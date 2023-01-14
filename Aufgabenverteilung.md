@@ -1,18 +1,18 @@
 # Aufgabenverteilung
 
-## Sam
+## Sam Barjesteh
 - Alles aus dem Ordner src (Dashboard, Historical_Data)
 - Environment Setup
 - Readme
-## Frank
+## Frank Kovmir
 - GUI - Design, Button-Funktionen
 - Prognose - Funktion
 - Tooltip, Readme
-## Sven
+## Sven Simon Szczesny
 - Map - Export
 - API - Aufruf
 - Testing
-## Hicham
+## Hicham Ben Ayoub
 - PDF - Export
 - CVS - Export
 - Testing
