@@ -136,6 +136,10 @@ Sollten bei dem Start der Anwendung (.exe) Fehler entstehen, dann befindet sich 
 
 ![grafik](https://user-images.githubusercontent.com/114833933/210901385-532ac98a-bffd-410a-a063-93a0af3fc61a.png)
 
+Ein bekanntes Problem ist, dass das Dashboard für die historischen Daten bei der .exe nicht korrekt funktioniert. Um das Problem zu lösen müssen zuvor die Module "dash" und "dash-bootstrap-components" (zB per pip install) installiert werden. Ggf. muss die sich öffnende Browserseite aktualisiert werden.
+
+Ebenso ist bei der .exe die lange Ladezeit bis zur Öffnung des Programms ein bekanntes, aber nicht ohne weiteres lösbares Problem, da viele Pakete geladen werden müssen. Hier muss man geduldig sein.
+
 Teilweise kommt es zu Problemen bei dem für Sounds genutzten Pygame Modul in Kombination mit AnaConda (o.ä. Environments) aufgrund von einer fehlenden .dll Datei (libmpg123-0.dll). Diese sollten nur entstehen, wenn die main.py per IDE oder Terminal gestartet wird, nicht jedoch bei der .exe Datei.
 Ein möglicher Workaround ist der manuelle Download einer passenden .whl (wheel) Datei.
 
