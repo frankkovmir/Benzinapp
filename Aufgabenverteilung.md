@@ -5,7 +5,7 @@
 - Environment Setup
 - Readme
 ## Frank
-- GUI - Design, Funktionen
+- GUI - Design, Button-Funktionen
 - Prognose - Funktion
 - Tooltip, Readme
 ## Sven
